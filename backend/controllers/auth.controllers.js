@@ -49,9 +49,39 @@ export const signup = async (req, res) => {
 }
 
 export const login = async (req, res) => {
-    res.json({
-        message: 'User logged in successfully'
-    })
+    try {
+        const { username, email, password } = req.body
+        if (!username && !email) {
+            return res.status(400).json({ message: 'Please provide either username or email' })
+        }
+        const user = await UserModel.findOne({
+            $or: [{ username }, { email }]
+        })
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid credentials' })
+        }
+        const isPasswordValid = await UserModel.isPasswordCorrect(password)
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Password is incorrect' })
+        }
+        generateTokenAndSetCookie(user._id, res)
+        res
+        .status(200)
+        .json({
+            _id: newUser._id,
+            fullName: newUser.fullName,
+            username: newUser.username,
+            email: newUser.email,
+            followers: newUser.followers,
+            following: newUser.following,
+            profileImg: newUser.profileImg,
+            coverImg: newUser.coverImg
+        })
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Internal Server Error' })
+    }
 }
 
 export const logout = async (req, res) => {
