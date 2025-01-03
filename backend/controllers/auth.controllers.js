@@ -60,23 +60,24 @@ export const login = async (req, res) => {
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' })
         }
-        const isPasswordValid = await UserModel.isPasswordCorrect(password)
+        const isPasswordValid = await user.isPasswordCorrect(password)
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Password is incorrect' })
         }
         generateTokenAndSetCookie(user._id, res)
-        res
-        .status(200)
-        .json({
-            _id: newUser._id,
-            fullName: newUser.fullName,
-            username: newUser.username,
-            email: newUser.email,
-            followers: newUser.followers,
-            following: newUser.following,
-            profileImg: newUser.profileImg,
-            coverImg: newUser.coverImg
-        })
+        res.status(200).json({
+            message: 'User login successfully',
+            user: {
+                _id: user._id,
+                fullName: user.fullName,
+                username: user.username,
+                email: user.email,
+                followers: user.followers,
+                following: user.following,
+                profileImg: user.profileImg,
+                coverImg: user.coverImg,
+            },
+        });
 
     } catch (error) {
         console.error(error)
