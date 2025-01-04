@@ -67,3 +67,33 @@ export const followUnfollowUser = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+export const getSuggestedUsers = async (req, res) => {
+    try {
+        const userId = req.user._id
+        const userFollowedByMe = await UserModel.findById(userId).select("following")
+        if(!userFollowedByMe) {
+            return res.status(404).json({ error: "User not found" })
+        }
+
+        const users = await UserModel.aggregate([
+            {
+                $match: {
+                    _id: {$ne: userId}
+                }
+            },
+            {
+                $sample :{size: 10}
+            }
+        ])
+
+        const filteredUsers = users.filter(user => !userFollowedByMe.following.includes(user._id))
+        const suggestedUsers = filteredUsers.slice(0, 5);
+        suggestedUsers.forEach(user => user.password = null)
+        res.status(200).json(suggestedUsers);
+
+    } catch (error) {
+        console.error("Error in getSuggestedUsers", error);
+        res.status(500).json({ error: error.message });
+    }
+}
