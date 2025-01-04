@@ -97,3 +97,30 @@ export const getSuggestedUsers = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+export const updateUserProfile = async (req, res) => {
+    const {fullName, email, username, currentPassword, newPassword, bio, link} = req.body
+    let {profileImg, coverImg} = req.body
+    const userId = req.user._id
+
+    try {
+        const user = await UserModel.findById(id)
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        if((!newPassword && currentPassword) || (!currentPassword && newPassword)){
+            return res.status(400).json({ error: "Please provide both current password and new password" });
+        }
+        // if (user.username !== username) {
+        //     const existingUser = await UserModel.findOne({ username });
+        //     if (existingUser) {
+        //         return res.status(400).json({ error: "Username already taken" });
+        //     }
+        //     user.username = username;
+        // }
+    } catch (error) {
+        console.error("Error in updateUserProfile", error);
+        res.status(500).json({ error: error.message });
+    }
+}

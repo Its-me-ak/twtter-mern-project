@@ -1,4 +1,4 @@
-import UserModel from "../models/user.model";
+import UserModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 
 export const protectedRoute = async (req, res, next) => {
@@ -16,7 +16,7 @@ export const protectedRoute = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({ error: 'Unauthorized: User not found' });
         }
-        console.log(user);
+        // console.log(user);
         req.user = user;
         next();
     } catch (error) {
