@@ -115,15 +115,17 @@ export const updateUserProfile = async (req, res) => {
             return res.status(400).json({ error: "Please provide both current password and new password" });
         }
         if (newPassword && currentPassword) {
-            const isPasswordMatch = await bcrypt.compare(newPassword, user.password)
+            const isPasswordMatch = await bcrypt.compare(currentPassword, user.password)
             if (!isPasswordMatch) {
                 return res.status(401).json({ error: "Current password is incorrect" });
             }
             if (newPassword.length < 8) {
                 return res.status(400).json({ error: "Password must be at least 8 characters long" });
             }
-            const salt = await bcrypt.genSalt(10)
-            user.password = await bcrypt.hash(newPassword, salt)
+            // const salt = await bcrypt.genSalt(10)
+            user.password = await bcrypt.hash(newPassword, 10)
+            // console.log(salt);
+            
         }
         if (profileImg) {
             // delete existing profile image if have any
@@ -150,7 +152,9 @@ export const updateUserProfile = async (req, res) => {
         user.link = link || user.link;
         user.profileImg = profileImg || user.profileImg;
         user.coverImg = coverImg || user.coverImg;
-        user = await user.save()
+        user = await user.save({
+            validateBeforeSave: false
+        })
 
         user.password = null; // remove password from the response data before sending back to the client
         res.status(200).json({
