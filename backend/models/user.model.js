@@ -19,18 +19,11 @@ const userSchema = new Schema({
         unique: true,
         trim: true,
         lowercase: true,
-        match: [
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            "Please enter a valid email address"
-        ]
     },
     password: {
         type: String,
         required: true,
         minlength: [8, "Password must be at least 8 characters long"],
-        match:
-            [/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"]
     },
     followers: [
         {

@@ -13,5 +13,4 @@ export const generateTokenAndSetCookie = (userId, res) => {
     };
     res.status(201)
     .cookie("JWT", token, options)
-    .json({ message: "Token generated successfully" });
 }

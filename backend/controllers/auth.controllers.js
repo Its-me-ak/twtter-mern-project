@@ -6,14 +6,37 @@ export const signup = async (req, res) => {
     try {
         const { fullName, username, email, password } = req.body
 
-        const existingUser = await UserModel.findOne({ username });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Username is already taken' });
+        // Basic validation
+        if (!fullName || !username || !email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
         }
 
-        const existingEmail = await UserModel.findOne({ email })
-        if (existingEmail) {
-            return res.status(400).json({ message: 'Email is already registered' });
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ message: 'Invalid email format' });
+        }
+
+        // Validate password complexity
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                message: 'Password must contain at least one uppercase letter, one lowercase letter, one number, one special character',
+            });
+        }
+
+        // Check for existing user
+        const existingUser = await UserModel.findOne({
+            $or: [{ username }, { email }]
+        });
+
+        if (existingUser) {
+            if (existingUser.username === username) {
+                return res.status(400).json({ message: 'Username is already taken' });
+            }
+            if (existingUser.email === email) {
+                return res.status(400).json({ message: 'Email is already registered' });
+            }
         }
 
         // hash password
@@ -25,8 +48,8 @@ export const signup = async (req, res) => {
             password: hashedPassword
         })
         if (newUser) {
-            generateTokenAndSetCookie(newUser._id, res)
             await newUser.save()
+            generateTokenAndSetCookie(newUser._id, res)
             res.status(201).json({
                 _id: newUser._id,
                 fullName: newUser.fullName,
