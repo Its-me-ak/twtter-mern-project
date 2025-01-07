@@ -2,6 +2,7 @@ import express from "express";
 import authRoutes from "./routes/auth.route.js"
 import userRoutes from "./routes/user.route.js"
 import postRoutes from "./routes/post.route.js"
+import notificationRoutes from "./routes/notification.route.js"
 import dotenv from "dotenv"
 import dbConnect from "./db/dbConnect.js";
 import cookieParser from "cookie-parser";
@@ -24,6 +25,8 @@ app.use(cookieParser())
 app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/posts", postRoutes)
+app.use("/api/notifications", notificationRoutes)
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
