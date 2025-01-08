@@ -8,7 +8,7 @@ export const getUserProfile = async (req, res) => {
     try {
         const user = await UserModel.findOne({ username }).select("-password");
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ error: "User not found" });
         }
         res.status(200).json(user);
     } catch (error) {

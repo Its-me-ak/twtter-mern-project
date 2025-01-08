@@ -19,7 +19,7 @@ export const createPost = async (req, res) => {
         if (image) {
             const uploadedImageUrl = await cloudinary.uploader.upload(image)
             if (!uploadedImageUrl) {
-                return res.status(500).json({ message: 'Error while uploading image' });
+                return res.status(500).json({ error: 'Error while uploading image' });
             }
             console.log(uploadedImageUrl);
             image = uploadedImageUrl.secure_url;
@@ -36,7 +36,7 @@ export const createPost = async (req, res) => {
         });
     } catch (error) {
         console.error("Error in createPost controller", error);
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 }
 
@@ -59,7 +59,7 @@ export const deletePost = async (req, res) => {
 
     } catch (error) {
         console.error("Error in deletePost controller", error);
-        res.status(500).json({ message: 'Internal Server Error', error });
+        res.status(500).json({ error: 'Internal Server Error', error });
     }
 }
 
@@ -88,7 +88,7 @@ export const commentonPost = async (req, res) => {
         })
     } catch (error) {
         console.error("Error in commentonPost controller", error);
-        res.status(500).json({ message: 'Internal Server Error', error });
+        res.status(500).json({ error: 'Internal Server Error', error });
     }
 }
 
@@ -146,7 +146,7 @@ export const likeUnlikePost = async (req, res) => {
         }
     } catch (error) {
         console.error("Error in likeUnlikePost controller", error);
-        res.status(500).json({ message: 'Internal Server Error', error });
+        res.status(500).json({ error: 'Internal Server Error', error });
     }
 }
 
@@ -171,7 +171,7 @@ export const getAllPosts = async (req, res) => {
         })
     } catch (error) {
         console.error("Error in getAllPosts controller", error);
-        res.status(500).json({ message: 'Internal Server Error', error });
+        res.status(500).json({ error: 'Internal Server Error', error });
     }
 }
 
@@ -200,7 +200,7 @@ export const getLikedPosts = async (req, res) => {
         })
     } catch (error) {
         console.error("Error in getLikedPosts controller", error);
-        res.status(500).json({ message: 'Internal Server Error', error });
+        res.status(500).json({ error: 'Internal Server Error', error });
     }
 }
 
@@ -228,7 +228,7 @@ export const getFollowingPosts = async (req, res) => {
         })
     } catch (error) {
         console.error("Error in getFollowingPosts controller", error);
-        res.status(500).json({ message: 'Internal Server Error', error });
+        res.status(500).json({ error: 'Internal Server Error', error });
     }
 }
 
@@ -256,6 +256,6 @@ export const getUserPosts = async (req, res) => {
         })
     } catch (error) {
         console.error("Error in getUserPosts controller", error);
-        res.status(500).json({ message: 'Internal Server Error', error });
+        res.status(500).json({ error: 'Internal Server Error', error });
     }
 } 
