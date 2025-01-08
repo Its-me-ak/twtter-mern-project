@@ -7,26 +7,54 @@ import { MdOutlineMail } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
 import { MdDriveFileRenameOutline } from "react-icons/md";
+import { QueryClient, useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const SignUpPage = () => {
+    const queryClient = new QueryClient()
     const [formData, setFormData] = useState({
         email: "",
         username: "",
         fullName: "",
         password: "",
     });
+    // useMutation() - when modifying the data
+    // useQuery() - when fetching the data
+    const { mutate, isError, isPending, error } = useMutation({
+        mutationFn: async ({ email, username, fullName, password }) => {
+            const response = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, username, fullName, password }),
+                // usecase: when we want to send data to the server using api we have to send it in string format using stringify
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "Failed to create account");
+            console.log(data);
+            return data;
+        },
+        onError: (err) => {
+            toast.error(err.message || 'Failed to register user');
+        },
+        onSuccess: () => {
+            toast.success("Account created successfully");
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
+        }
+    })
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        mutate(formData)
         console.log(formData);
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
-        // console.log(formData);
     };
-    const isError = false;
 
     const [showPassword, setShowPassword] = useState(false);
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
@@ -93,8 +121,10 @@ const SignUpPage = () => {
                             {showPassword ? <AiFillEyeInvisible /> : <AiFillEye />}
                         </button>
                     </label>
-                    <button className='btn rounded-full btn-primary text-white'>Sign up</button>
-                    {isError && <p className='text-red-500'>Something went wrong</p>}
+                    <button className='btn rounded-full btn-primary text-white'>
+                        {isPending ? 'Loading...' : 'Sign Up'}
+                    </button>
+                    {isError && <p className='text-red-500 text-sm'>{error.message}</p>}
                 </form>
                 <div className='flex flex-col lg:w-2/3 gap-2 mt-4'>
                     <p className='text-white text-lg'>Already have an account?</p>
