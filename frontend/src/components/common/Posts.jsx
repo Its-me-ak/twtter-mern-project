@@ -1,10 +1,9 @@
 import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
 import {useQuery} from "@tanstack/react-query"
+import { useEffect } from "react";
 
 const Posts = ({feedType}) => {
-  const isLoading = false;
-
   const getPostEndPont = () => {
     switch (feedType) {
       case "forYou":
@@ -18,21 +17,27 @@ const Posts = ({feedType}) => {
   }
 
   const POST_URI = getPostEndPont();
-  const {data:posts} = useQuery({
+  console.log(POST_URI);
+  
+  const {data:posts, isLoading, refetch, isFetching} = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
       const response = await fetch(POST_URI);
       const data = await response.json();
-      console.log('posts data:', data);
+      // console.log('posts data:', data);
       
       if (!response.ok) throw new Error(data.error || "Failed to fetch posts");
       return data;
     }
   })
 
+  useEffect(() => {
+    refetch()
+  }, [feedType, refetch])
+
   return (
     <>
-      {isLoading && (
+      {(isLoading || isFetching) && (
         <div className='flex flex-col justify-center'>
           <PostSkeleton />
           <PostSkeleton />

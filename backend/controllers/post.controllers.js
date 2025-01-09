@@ -191,10 +191,7 @@ export const getLikedPosts = async (req, res) => {
         if (likedPosts.length === 0) {
             return res.status(200).json([]);
         }
-        res.status(200).json({
-            message: 'Liked posts fetched successfully',
-            likedPosts
-        })
+        res.status(200).json(likedPosts)
     } catch (error) {
         console.error("Error in getLikedPosts controller", error);
         res.status(500).json({ error: 'Internal Server Error', error });
@@ -219,10 +216,7 @@ export const getFollowingPosts = async (req, res) => {
                 path: 'comments.user',
                 select: '-password -email'
             })
-        res.status(200).json({
-            message: 'Following posts fetched successfully',
-            followingUsersPosts
-        })
+        res.status(200).json(followingUsersPosts)
     } catch (error) {
         console.error("Error in getFollowingPosts controller", error);
         res.status(500).json({ error: 'Internal Server Error', error });
@@ -247,10 +241,7 @@ export const getUserPosts = async (req, res) => {
                 select: '-password -email'
             })
 
-        res.status(200).json({
-            message: 'User posts fetched successfully',
-            userPosts
-        })
+        res.status(200).json(userPosts)
     } catch (error) {
         console.error("Error in getUserPosts controller", error);
         res.status(500).json({ error: 'Internal Server Error', error });
