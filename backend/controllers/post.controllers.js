@@ -165,10 +165,7 @@ export const getAllPosts = async (req, res) => {
         if (posts.length === 0) {
             return res.status(200).json([]);
         }
-        res.status(200).json({
-            message: 'Posts fetched successfully',
-            posts
-        })
+        res.status(200).json(posts)
     } catch (error) {
         console.error("Error in getAllPosts controller", error);
         res.status(500).json({ error: 'Internal Server Error', error });
