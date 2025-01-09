@@ -5,7 +5,7 @@ import XSvg from "../../../components/svg/X";
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const LoginPage = () => {
@@ -13,6 +13,7 @@ const LoginPage = () => {
     username: "",
     password: "",
   });
+const queryClient = useQueryClient()
 
   const { mutate:loginMutate, isError, isPending, error } = useMutation({
     mutationFn: async ({ username, password }) => {
@@ -34,13 +35,15 @@ const LoginPage = () => {
     },
     onSuccess: () => {
       toast.success("Successfully logged in");
+      // Redirect to home page after successful login
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
     }
   })
 
   const handleSubmit = (e) => {
     e.preventDefault();
     loginMutate(formData);
-    console.log(formData);
+    // console.log(formData);
   };
 
   const handleInputChange = (e) => {
