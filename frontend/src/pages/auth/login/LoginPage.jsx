@@ -5,6 +5,8 @@ import XSvg from "../../../components/svg/X";
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
+import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -12,16 +14,38 @@ const LoginPage = () => {
     password: "",
   });
 
+  const { mutate:loginMutate, isError, isPending, error } = useMutation({
+    mutationFn: async ({ username, password }) => {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to create account");
+      console.log(data);
+      return data;
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Failed to Login');
+    },
+    onSuccess: () => {
+      toast.success("Successfully logged in");
+    }
+  })
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    loginMutate(formData);
     console.log(formData);
   };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const isError = false;
 
   const [showPassword, setShowPassword] = useState(false);
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
@@ -67,13 +91,15 @@ const LoginPage = () => {
             </button>
           </label>
               </div>
-          <button className='btn rounded-full btn-primary text-white'>Sign up</button>
-          {isError && <p className='text-red-500'>Something went wrong</p>}
+          <button className='btn rounded-full btn-primary text-white'>
+            {isPending ? "Loading..." : "Login"}
+          </button>
+          {isError && <p className='text-red-500 text-sm'>{error.message}</p>}
         </form>
         <div className='flex flex-col gap-2 mt-4'>
           <p className='text-white text-lg'>{"Don't"} have an account?</p>
           <Link to='/signup'>
-            <button className='btn rounded-full btn-primary text-white btn-outline w-full'>Sign up</button>
+            <button className='btn rounded-full btn-primary text-white btn-outline w-full'>Sign Up</button>
           </Link>
         </div>
       </div>

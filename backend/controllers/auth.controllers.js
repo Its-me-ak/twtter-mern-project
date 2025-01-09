@@ -78,7 +78,10 @@ export const login = async (req, res) => {
             return res.status(400).json({ error: 'Please provide either username or email' })
         }
         const user = await UserModel.findOne({
-            $or: [{ username }, { email }]
+            $or: [
+                { username },
+                { email: { $regex: new RegExp(`^${username}$`, 'i') } },
+            ]
         })
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' })
