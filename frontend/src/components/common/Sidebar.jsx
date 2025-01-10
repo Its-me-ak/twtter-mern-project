@@ -21,6 +21,7 @@ const Sidebar = () => {
         },
         onSuccess: () => {
             toast.success('Logged out successfully')
+            // redirect to the login page after successfully logout
             queryClient.invalidateQueries({ queryKey: ["authUser"] });
         },
         onError: (err) => {
@@ -31,7 +32,6 @@ const Sidebar = () => {
     const { data: authUser } = useQuery({
         queryKey: ["authUser"]
     })
-    console.log(authUser);
     
 
     return (
