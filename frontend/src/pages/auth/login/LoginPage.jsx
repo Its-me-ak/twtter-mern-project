@@ -35,7 +35,7 @@ const queryClient = useQueryClient()
     },
     onSuccess: () => {
       toast.success("Successfully logged in");
-      // Redirect to home page after successful login
+      // refetch the authUser data as stale
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
     }
   })

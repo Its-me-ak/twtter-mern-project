@@ -17,7 +17,26 @@ const Post = ({ post }) => {
     const isLiked = false;
 
     const isMyPost = authUser.user._id === post.user._id;
-    const formattedDate = "1h";
+    const formatDate = (dateString) => {
+        const now = new Date();
+        const postDate = new Date(dateString);
+        const diffInSeconds = Math.floor((now - postDate) / 1000);
+
+        const minutes = Math.floor(diffInSeconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (minutes < 60) {
+            return `${minutes}m ago`;
+        } else if (hours < 24) {
+            return `${hours}h ago`;
+        } else {
+            return `${days}d ago`;
+        }
+    };
+    // const {data:posts} = useQuery({
+    //     queryKey: ["posts"],
+    // })
 
     const isCommenting = false;
 
@@ -70,7 +89,7 @@ const Post = ({ post }) => {
                         <span className='text-gray-700 flex gap-1 text-sm'>
                             <Link to={`/profile/${postOwner.username}`}>@{postOwner.username}</Link>
                             <span>·</span>
-                            <span>{formattedDate}</span>
+                            {/* <span>{posts?.createdAt ? formatDate(posts.createdAt) : ''}</span> */}
                         </span>
                         {isMyPost && (
                             <span className='flex justify-end flex-1'>

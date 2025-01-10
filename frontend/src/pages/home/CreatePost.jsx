@@ -2,7 +2,8 @@ import { CiImageOn } from "react-icons/ci";
 import { BsEmojiSmileFill } from "react-icons/bs";
 import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const CreatePost = () => {
   const [text, setText] = useState("");
@@ -10,16 +11,39 @@ const CreatePost = () => {
 
   const imgRef = useRef(null);
 
-  const isPending = false;
-  const isError = false;
-
   const { data: authUser } = useQuery({
     queryKey: ["authUser"]
   })
 
+  const queryClient = useQueryClient()
+
+  const { mutate: createPost, isPending, isError, error } = useMutation({
+    mutationFn: async ({ text, img }) => {
+      const response = await fetch('/api/posts/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text, img }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Failed to create post");
+      return data;
+    },
+    onSuccess: () => {
+      setText("");
+      setImg(null);
+      toast.success("Post created successfully");
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    }
+  })
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert("Post created successfully");
+    createPost({
+      text,
+      img,
+    });
   };
 
   const handleImgChange = (e) => {
@@ -69,13 +93,13 @@ const CreatePost = () => {
             <BsEmojiSmileFill className='fill-primary w-5 h-5 cursor-pointer' />
           </div>
           <input type='file'
-          accept="image/*"
-          hidden ref={imgRef} onChange={handleImgChange} />
+            accept="image/*"
+            hidden ref={imgRef} onChange={handleImgChange} />
           <button className='btn btn-primary rounded-full btn-sm text-white px-4'>
             {isPending ? "Posting..." : "Post"}
           </button>
         </div>
-        {isError && <div className='text-red-500'>Something went wrong</div>}
+        {isError && <div className='text-red-500'>{error.message}</div>}
       </form>
     </div>
   );

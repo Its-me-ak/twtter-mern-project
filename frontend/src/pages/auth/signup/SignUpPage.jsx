@@ -41,7 +41,7 @@ const SignUpPage = () => {
         },
         onSuccess: () => {
             toast.success("Account created successfully");
-            // Redirect to home page after successful registration process
+            // refetch the authUser data as stale
             queryClient.invalidateQueries({ queryKey: ["authUser"] });
         }
     })
