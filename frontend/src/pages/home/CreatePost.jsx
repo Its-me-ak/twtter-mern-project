@@ -7,8 +7,7 @@ import toast from "react-hot-toast";
 
 const CreatePost = () => {
   const [text, setText] = useState("");
-  const [img, setImg] = useState(null);
-
+  const [image, setImage] = useState(null);
   const imgRef = useRef(null);
 
   const { data: authUser } = useQuery({
@@ -18,13 +17,13 @@ const CreatePost = () => {
   const queryClient = useQueryClient()
 
   const { mutate: createPost, isPending, isError, error } = useMutation({
-    mutationFn: async ({ text, img }) => {
+    mutationFn: async ({ text, image }) => {
       const response = await fetch('/api/posts/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text, img }),
+        body: JSON.stringify({ text, image }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "Failed to create post");
@@ -32,7 +31,7 @@ const CreatePost = () => {
     },
     onSuccess: () => {
       setText("");
-      setImg(null);
+      setImage(null);
       toast.success("Post created successfully");
       queryClient.invalidateQueries({ queryKey: ["posts"] });
     }
@@ -42,7 +41,7 @@ const CreatePost = () => {
     e.preventDefault();
     createPost({
       text,
-      img,
+      image,
     });
   };
 
@@ -51,7 +50,7 @@ const CreatePost = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setImg(reader.result);
+        setImage(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -71,16 +70,16 @@ const CreatePost = () => {
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
-        {img && (
+        {image && (
           <div className='relative w-72 mx-auto'>
             <IoCloseSharp
               className='absolute top-0 right-0 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
               onClick={() => {
-                setImg(null);
+                setImage(null);
                 imgRef.current.value = null;
               }}
             />
-            <img src={img} className='w-full mx-auto h-72 object-contain rounded' />
+            <img src={image} className='w-full mx-auto h-72 object-contain rounded' />
           </div>
         )}
 

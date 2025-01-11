@@ -24,7 +24,7 @@ const Posts = ({feedType}) => {
     queryFn: async () => {
       const response = await fetch(POST_URI);
       const data = await response.json();
-      // console.log('posts data:', data);
+      console.log('posts data:', data);
       
       if (!response.ok) throw new Error(data.error || "Failed to fetch posts");
       return data;
