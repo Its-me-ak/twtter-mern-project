@@ -13,19 +13,21 @@ const Post = ({ post }) => {
     const postOwner = post.user;
 
     const isMyPost = authUser.user._id === post.user._id;
-    const isLiked  = post.likes.includes(authUser.user._id);
-    
+    const isLiked = post.likes.includes(authUser.user._id);
+
     const formatDate = (dateString) => {
         const now = new Date();
 
         const postDate = new Date(dateString);
         const diffInSeconds = Math.floor((now - postDate) / 1000);
-
         const minutes = Math.floor(diffInSeconds / 60);
         const hours = Math.floor(minutes / 60);
         const days = Math.floor(hours / 24);
 
-        if (minutes < 60) {
+        if (diffInSeconds < 60) {
+            return 'Just now'
+        }
+        else if (minutes < 60) {
             return `${minutes}m ago`;
         } else if (hours < 24) {
             return `${hours}h ago`;
@@ -34,11 +36,9 @@ const Post = ({ post }) => {
         }
     };
 
-    const isCommenting = false;
-
     const queryClient = useQueryClient()
     // Delete Post
-    const { mutate: deletePost, isPending:isDeleting } = useMutation({
+    const { mutate: deletePost, isPending: isDeleting } = useMutation({
         mutationFn: async () => {
             try {
                 const res = await fetch(`/api/posts/${post._id}`, {
@@ -68,7 +68,7 @@ const Post = ({ post }) => {
                     method: "POST"
                 });
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.error || "Failed to like post");                
+                if (!response.ok) throw new Error(data.error || "Failed to like post");
                 return data;
             } catch (error) {
                 throw new Error(error)
@@ -90,16 +90,46 @@ const Post = ({ post }) => {
         }
     })
 
+    // comment post
+    const { mutate: commentPost, isPaused: isCommenting } = useMutation({
+        mutationFn: async () => {
+            try {
+                const response = await fetch(`/api/posts/comment/${post._id}`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: comment })
+                })
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Failed to comment post");
+                return data;
+            } catch (error) {
+                throw new Error(error)
+            }
+        },
+        onSuccess: () => {
+            toast.success('Comment posted successfully')
+            setComment('');
+            queryClient.invalidateQueries({ queryKey: ["posts"] });
+        },
+        onError: (err) => {
+            toast.error(err.message || "Failed to comment post");
+        }
+    })
+
     const handleDeletePost = () => {
         deletePost();
     };
 
     const handlePostComment = (e) => {
         e.preventDefault();
+        if (isCommenting) return
+        commentPost(comment);
     };
 
     const handleLikePost = () => {
-        if(isLiking) return;
+        if (isLiking) return;
         likePost();
     };
 
