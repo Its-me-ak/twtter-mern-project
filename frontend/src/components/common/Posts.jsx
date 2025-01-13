@@ -18,7 +18,6 @@ const Posts = ({ feedType, username, userId }) => {
         return "/api/posts/all-posts"
     }
   }
-  console.log(feedType);
 
   const POST_URI = getPostEndPont();
   console.log(POST_URI);

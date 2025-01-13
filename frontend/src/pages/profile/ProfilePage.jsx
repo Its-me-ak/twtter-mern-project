@@ -9,6 +9,8 @@ import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
+import useFollow from "../../hooks/useFollow";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const ProfilePage = () => {
     const {username} = useParams()
@@ -19,15 +21,13 @@ const ProfilePage = () => {
                 const response = await fetch(`/api/users/profile/${username}`);
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || "Failed to fetch user data");
+                console.log('User', data);
                 return data;
             } catch (error) {
                 throw new Error(error)
             }
         }
     })
-    useEffect(() => {
-        refetch()
-    }, [username, refetch]);
 
     const {data:authUser} = useQuery({
         queryKey: ['authUser']
@@ -51,6 +51,14 @@ const ProfilePage = () => {
     const profileImgRef = useRef(null);
 
     const isMyProfile = authUser.user?._id === user?._id;
+
+   const {followUser, isPending}  = useFollow()
+   const isFollowing = authUser.user?.following.includes(user?._id)
+   console.log(isFollowing);
+   
+    useEffect(() => {
+        refetch()
+    }, [username, refetch]);
 
     const handleImgChange = (e, state) => {
         const file = e.target.files[0];
@@ -87,7 +95,7 @@ const ProfilePage = () => {
                                 </Link>
                                 <div className='flex flex-col'>
                                     <p className='font-bold text-lg'>{user?.fullName}</p>
-                                    <span className='text-sm text-slate-500'>{posts.length} posts</span>
+                                    <span className='text-sm text-slate-500'>{posts?.length} posts</span>
                                 </div>
                             </div>
                             {/* COVER IMG */}
@@ -140,9 +148,11 @@ const ProfilePage = () => {
                                 {!isMyProfile && (
                                     <button
                                         className='btn btn-outline rounded-full btn-sm'
-                                        onClick={() => alert("Followed successfully")}
+                                        onClick={() => followUser(user._id)}
                                     >
-                                        Follow
+                                        {isPending && <LoadingSpinner size="sm"/>}
+                                        {!isPending && isFollowing && "Unfollow"}
+                                        {!isPending && !isFollowing && "Follow"}
                                     </button>
                                 )}
                                 {(coverImg || profileImg) && (
