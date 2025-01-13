@@ -180,7 +180,7 @@ const ProfilePage = () => {
                                 </div>
                             </div>
                             <div className='flex justify-end px-4 mt-5'>
-                                {isMyProfile && <EditProfileModal />}
+                                {isMyProfile && <EditProfileModal authUser={authUser} />}
                                 {!isMyProfile && (
                                     <button
                                         className='btn btn-outline rounded-full btn-sm'
@@ -214,7 +214,7 @@ const ProfilePage = () => {
                                             <>
                                                 <FaLink className='w-3 h-3 text-slate-500' />
                                                 <a
-                                                    href={`https://${user?.link}`}
+                                                    href={`${user?.link}`}
                                                     target='_blank'
                                                     rel='noreferrer'
                                                     className='text-sm text-blue-500 hover:underline'
