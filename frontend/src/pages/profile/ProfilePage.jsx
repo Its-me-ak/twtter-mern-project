@@ -8,14 +8,16 @@ import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useFollow from "../../hooks/useFollow";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import toast from "react-hot-toast";
 
 const ProfilePage = () => {
-    const {username} = useParams()
-   const {data: user, isLoading, refetch, isRefetching } = useQuery({
-        queryKey: ['user'],
+    const queryClient = useQueryClient()
+    const { username } = useParams()
+    const { data: user, isLoading, refetch, isRefetching } = useQuery({
+        queryKey: ['userProfile'],
         queryFn: async () => {
             try {
                 const response = await fetch(`/api/users/profile/${username}`);
@@ -29,10 +31,10 @@ const ProfilePage = () => {
         }
     })
 
-    const {data:authUser} = useQuery({
+    const { data: authUser } = useQuery({
         queryKey: ['authUser']
     })
-    
+
     const { data: posts } = useQuery({
         queryKey: ["posts"],
         queryFn: async () => {
@@ -52,10 +54,44 @@ const ProfilePage = () => {
 
     const isMyProfile = authUser.user?._id === user?._id;
 
-   const {followUser, isPending}  = useFollow()
-   const isFollowing = authUser.user?.following.includes(user?._id)
-   console.log(isFollowing);
-   
+    const { followUser, isPending } = useFollow()
+    const isFollowing = authUser.user?.following.includes(user?._id)
+
+    // updating user profile
+    const {mutate:updateProfile, isPending:isUpdatingProfile} = useMutation({
+        mutationFn:async()=>{
+            try {
+                const response = await fetch('/api/users/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        coverImg,
+                        profileImg
+                    }),
+                })
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Something went wrong");
+                return data;
+            } catch (error) {
+                throw new Error(error)
+            }
+        },
+        onSuccess: () => {
+            toast.success('Profile updated successfully')
+            setProfileImg(null)
+            setCoverImg(null)
+            Promise.all([
+                    queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+                    queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
+            ])
+        },
+        onError: (error) => {
+            toast.error(error.message)
+        }
+    })
+
     useEffect(() => {
         refetch()
     }, [username, refetch]);
@@ -78,7 +114,7 @@ const ProfilePage = () => {
             month: "long",
         }
         return new Intl.DateTimeFormat('en-US', options).format(new Date(dateString))
-    } 
+    }
 
     return (
         <>
@@ -150,7 +186,7 @@ const ProfilePage = () => {
                                         className='btn btn-outline rounded-full btn-sm'
                                         onClick={() => followUser(user._id)}
                                     >
-                                        {isPending && <LoadingSpinner size="sm"/>}
+                                        {isPending && <LoadingSpinner size="sm" />}
                                         {!isPending && isFollowing && "Unfollow"}
                                         {!isPending && !isFollowing && "Follow"}
                                     </button>
@@ -158,9 +194,9 @@ const ProfilePage = () => {
                                 {(coverImg || profileImg) && (
                                     <button
                                         className='btn btn-primary rounded-full btn-sm text-white px-4 ml-2'
-                                        onClick={() => alert("Profile updated successfully")}
+                                        onClick={() => updateProfile()}
                                     >
-                                        Update
+                                        {isUpdatingProfile ? 'Updating...' : 'Update'}
                                     </button>
                                 )}
                             </div>
@@ -183,7 +219,7 @@ const ProfilePage = () => {
                                                     rel='noreferrer'
                                                     className='text-sm text-blue-500 hover:underline'
                                                 >
-                                                  {user?.link}
+                                                    {user?.link}
                                                 </a>
                                             </>
                                         </div>
