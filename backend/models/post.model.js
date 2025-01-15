@@ -30,6 +30,13 @@ const postSchema = new Schema({
                 required: true
             }
         }
+    ],
+    bookmarkedBy: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            default: [],
+        }
     ]
 }, {
     timestamps: true,

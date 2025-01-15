@@ -61,6 +61,13 @@ const userSchema = new Schema({
             ref: "Post",
             default: []
         }
+    ],
+    bookmarkedPosts : [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Post",
+            default: []
+        }
     ]
 }, {
     timestamps: true
