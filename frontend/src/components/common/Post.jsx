@@ -1,5 +1,5 @@
 import { BiRepost } from "react-icons/bi";
-import { FaRegHeart, FaHeart, FaRegComment, FaTrash, FaRegBookmark } from "react-icons/fa";
+import { FaRegHeart, FaHeart, FaRegComment, FaTrash, FaRegBookmark, FaBookmark } from "react-icons/fa";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -14,6 +14,7 @@ const Post = ({ post }) => {
 
     const isMyPost = authUser.user._id === post.user._id;
     const isLiked = post.likes.includes(authUser.user._id);
+    const isBookmarked = post.bookmarkedBy.includes(authUser.user._id);
 
     const formatDate = (dateString) => {
         const now = new Date();
@@ -91,7 +92,7 @@ const Post = ({ post }) => {
     })
 
     // comment post
-    const { mutate: commentPost, isPaused: isCommenting } = useMutation({
+    const { mutate: commentPost, isPending: isCommenting } = useMutation({
         mutationFn: async () => {
             try {
                 const response = await fetch(`/api/posts/comment/${post._id}`, {
@@ -117,6 +118,41 @@ const Post = ({ post }) => {
             toast.error(err.message || "Failed to comment post");
         }
     })
+
+    // bookmark posts
+    const { mutate: bookmarkPost, isPending: isBookmarking } = useMutation({
+        mutationFn: async () => {
+            try {
+                const response = await fetch(`/api/posts/bookmark/${post._id}`, {
+                    method: "POST",
+                })
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Failed to bookmark post");
+                console.log('bookmark by ', data);
+                return data;
+            } catch (error) {
+                throw new Error(error)
+            }
+        },
+        onSuccess: (updatedBookmarks) => {
+            queryClient.setQueryData(["posts"], (oldData) => {
+                return oldData.map((p) => {
+                    if (p._id === post._id) {
+                        return { ...p, bookmarkedBy: updatedBookmarks };
+                    }
+                    return p;
+                });
+            });
+        },
+        onError: (err) => {
+            toast.error(err.message || "Failed to Bookmark post");
+        }
+    })
+
+    const handleBookmarkPost = () => {
+        if(isBookmarking) return
+        bookmarkPost()
+    }
 
     const handleDeletePost = () => {
         deletePost();
@@ -255,8 +291,13 @@ const Post = ({ post }) => {
                                 </span>
                             </div>
                         </div>
-                        <div className='flex w-1/3 justify-end gap-2 items-center'>
-                            <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer' />
+                        <div className='flex w-1/3 justify-end gap-2 items-center' onClick={handleBookmarkPost}>
+                        {!isBookmarked && (
+                            <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer hover:text-primary' />
+                        )}
+                        {isBookmarked && (
+                            <FaBookmark className='w-4 h-4 text-primary cursor-pointer' />
+                        )}
                         </div>
                     </div>
                 </div>
