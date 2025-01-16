@@ -68,6 +68,13 @@ const userSchema = new Schema({
             ref: "Post",
             default: []
         }
+    ],
+    repostedPosts : [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Post",
+            default: []
+        }
     ]
 }, {
     timestamps: true

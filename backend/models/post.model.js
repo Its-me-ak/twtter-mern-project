@@ -37,6 +37,17 @@ const postSchema = new Schema({
             ref: "User",
             default: [],
         }
+    ],
+    repostCount : {
+        type: Number,
+        default: 0
+    }, 
+    repostedBy: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            default: [],
+        }
     ]
 }, {
     timestamps: true,

@@ -1,4 +1,4 @@
-import { request } from "express";
+import e, { request } from "express";
 import PostModel from "../models/post.model.js";
 import UserModel from "../models/user.model.js";
 import { v2 as cloudinary } from "cloudinary";
@@ -183,8 +183,8 @@ export const bookmarkUnbookmarkPost = async (req, res) => {
         if (!post) {
             return res.status(404).json({ error: 'Post not found' });
         }
-        const userLikeedPostAleady = post.bookmarkedBy.includes(userId)
-        if (userLikeedPostAleady) {
+        const userBookmarkPostAleady = post.bookmarkedBy.includes(userId)
+        if (userBookmarkPostAleady) {
             // unbookmarked the post
             await PostModel.updateOne(
                 {
@@ -206,7 +206,7 @@ export const bookmarkUnbookmarkPost = async (req, res) => {
             const updatedBookmarks = post.bookmarkedBy.filter((id) => id.toString() !== userId.toString())
             res.status(200).json(updatedBookmarks)
         } else {
-            // like the post
+            // bookmark the post
             post.bookmarkedBy.push(userId)
             await UserModel.updateOne({
                 _id: userId
@@ -245,6 +245,52 @@ export const getBookmarkedPosts = async (req, res) => {
 
     } catch (error) {
         console.error("Error in getBookmarkedPosts controller", error);
+        res.status(500).json({ error: 'Internal Server Error', error });
+    }
+}
+
+// repost the posts
+export const repostPost = async (req, res) => {
+    try {
+        const postId = req.params.id
+        const userId = req.user._id
+        const post = await PostModel.findById(postId);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        // if user rposted a post already
+        const hasReposted = post.repostedBy.includes(userId)
+
+        if (hasReposted) {
+            post.repostedBy = post.repostedBy.filter((id) => id.toString() !== userId)
+            post.repostCount -= 1
+            // remove from user's reposted post
+            await UserModel.updateOne({
+                _id: userId
+            }, {
+                $pull: {
+                    repostedPosts: postId
+                }
+            })
+        } else {
+            post.repostedBy.push(userId)
+            post.repostCount += 1
+            // add to user's reposted post
+            await UserModel.updateOne({
+                _id: userId
+            }, {
+                $push: {
+                    repostedPosts: postId
+                }
+            })
+        }
+        await post.save()
+        res.status(200).json({
+            message: hasReposted ? 'Repost removed' : 'Reposted successfully',
+            post
+        })
+    } catch (error) {
+        console.error("Error in repostPost controller", error);
         res.status(500).json({ error: 'Internal Server Error', error });
     }
 }
