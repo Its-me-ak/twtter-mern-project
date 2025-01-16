@@ -1,14 +1,11 @@
-// import { Link } from "react-router-dom";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-
-// import { IoSettingsOutline } from "react-icons/io5";
-// import { FaUser } from "react-icons/fa";
-// import { FaHeart } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
-import Posts from "../../components/common/Posts";
 import toast from "react-hot-toast"
+import Post from "../../components/common/Post";
 
 const BookmarkPage = ({ userId }) => {
+    console.log(userId);
+    
     const { data: bookmarksData, isLoading, error } = useQuery({
         queryKey: ["bookmarks"],
         queryFn: async () => {
@@ -35,9 +32,10 @@ const BookmarkPage = ({ userId }) => {
                 </div>
                 {bookmarksData?.length === 0 && <div className='text-center p-4 font-bold'>No notifications 🤔</div>}
                 {
-                    bookmarksData.map((post) => (
-                        <Posts key={post._id} post={post} />
-                    ))
+                    bookmarksData.map((bookmark) => {
+                        console.log('Rendering post: ', bookmark);
+                        return <Post key={bookmark._id} post={bookmark} />
+                    })
                 }
             </div>
         </>
