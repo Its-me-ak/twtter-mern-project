@@ -259,12 +259,20 @@ export const repostPost = async (req, res) => {
             return res.status(404).json({ error: 'Post not found' });
         }
         // if user rposted a post already
-        const hasReposted = post.repostedBy.includes(userId)
-
-        if (hasReposted) {
-            post.repostedBy = post.repostedBy.filter((id) => id.toString() !== userId)
-            post.repostCount -= 1
-            // remove from user's reposted post
+        const userRepostPostAleady = post.repostedBy.includes(userId)
+        if (userRepostPostAleady) {
+            // unrepost the post
+            await PostModel.updateOne(
+                {
+                    _id: postId
+                },
+                {
+                    $pull: {
+                        repostedBy: userId
+                    },
+                    $inc: { repostCount: -1 }
+                }
+            )
             await UserModel.updateOne({
                 _id: userId
             }, {
@@ -272,10 +280,16 @@ export const repostPost = async (req, res) => {
                     repostedPosts: postId
                 }
             })
+            const updatedRepost = post.repostedBy.filter((id) => id.toString() !== userId.toString())
+            res.status(200).json({
+                message: 'Post unreposted successfully',
+                repostedBy: updatedRepost,
+                repostCount: post.repostCount - 1
+            });
         } else {
+            // repost the post
             post.repostedBy.push(userId)
-            post.repostCount += 1
-            // add to user's reposted post
+            post.repostCount = (post.repostCount || 0) + 1
             await UserModel.updateOne({
                 _id: userId
             }, {
@@ -285,10 +299,12 @@ export const repostPost = async (req, res) => {
             })
         }
         await post.save()
+        const updatedRepost = post.repostedBy
         res.status(200).json({
-            message: hasReposted ? 'Repost removed' : 'Reposted successfully',
-            post
-        })
+            message: 'Post reposted successfully',
+            repostedBy: updatedRepost,
+            repostCount: post.repostCount,
+        });
     } catch (error) {
         console.error("Error in repostPost controller", error);
         res.status(500).json({ error: 'Internal Server Error', error });

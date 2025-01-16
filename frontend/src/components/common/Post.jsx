@@ -15,6 +15,7 @@ const Post = ({ post }) => {
     const isMyPost = authUser.user._id === post.user._id;
     const isLiked = post.likes.includes(authUser.user._id);
     const isBookmarked = post.bookmarkedBy.includes(authUser.user._id);
+    const isReposted = post.repostedBy.includes(authUser.user._id);
 
     const formatDate = (dateString) => {
         const now = new Date();
@@ -149,8 +150,42 @@ const Post = ({ post }) => {
         }
     })
 
+    // repost posts
+    const { mutate: repostPost, isPending: isReposting } = useMutation({
+        mutationFn: async () => {
+            try {
+                const response = await fetch(`/api/posts/repost/${post._id}`, {
+                    method: "POST",
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Failed to repost post")
+                return data;
+            } catch (error) {
+                throw new Error(error)
+            }
+        },
+        onSuccess: (updatedRepost) => {
+            queryClient.setQueryData(["posts"], (oldData) => {
+                return oldData.map((p) => {
+                    if (p._id === post._id) {
+                        return { ...p, repostedBy: updatedRepost };
+                    }
+                    return p;
+                });
+            });
+        },
+        onError: (err) => {
+            toast.error(err.message || "Failed to repost post");
+        }
+    })
+
+    const handleRepostPosts = () => {
+        if (isReposting) return
+        repostPost();
+    }
+
     const handleBookmarkPost = () => {
-        if(isBookmarking) return
+        if (isBookmarking) return
         bookmarkPost()
     }
 
@@ -273,9 +308,11 @@ const Post = ({ post }) => {
                                     <button className='outline-none'>close</button>
                                 </form>
                             </dialog>
-                            <div className='flex gap-1 items-center group cursor-pointer'>
-                                <BiRepost className='w-6 h-6  text-slate-500 group-hover:text-green-500' />
-                                <span className='text-sm text-slate-500 group-hover:text-green-500'>0</span>
+                            <div className='flex gap-1 items-center group cursor-pointer' onClick={handleRepostPosts}>
+                                <BiRepost className={`w-6 h-6 ${isReposted ? "text-green-500" : "text-slate-500"}  group-hover:text-green-500`} />
+                                <span className={`text-sm ${isReposted ? "text-green-500" : "text-slate-500"}  group-hover:text-green-500`}>
+                                    {post.repostCount}
+                                </span>
                             </div>
                             <div className='flex gap-1 items-center group cursor-pointer' onClick={handleLikePost}>
                                 {!isLiked && (
@@ -292,12 +329,12 @@ const Post = ({ post }) => {
                             </div>
                         </div>
                         <div className='flex w-1/3 justify-end gap-2 items-center' onClick={handleBookmarkPost}>
-                        {!isBookmarked && (
-                            <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer hover:text-primary' />
-                        )}
-                        {isBookmarked && (
-                            <FaBookmark className='w-4 h-4 text-primary cursor-pointer' />
-                        )}
+                            {!isBookmarked && (
+                                <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer hover:text-primary' />
+                            )}
+                            {isBookmarked && (
+                                <FaBookmark className='w-4 h-4 text-primary cursor-pointer' />
+                            )}
                         </div>
                     </div>
                 </div>

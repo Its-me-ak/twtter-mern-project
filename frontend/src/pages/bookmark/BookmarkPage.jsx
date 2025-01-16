@@ -5,7 +5,6 @@ import Post from "../../components/common/Post";
 
 const BookmarkPage = ({ userId }) => {
     console.log(userId);
-    
     const { data: bookmarksData, isLoading, error } = useQuery({
         queryKey: ["bookmarks"],
         queryFn: async () => {
