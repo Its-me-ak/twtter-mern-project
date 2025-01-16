@@ -281,9 +281,8 @@ export const repostPost = async (req, res) => {
                 }
             })
             const updatedRepost = post.repostedBy.filter((id) => id.toString() !== userId.toString())
-            res.status(200).json({
-                message: 'Post unreposted successfully',
-                repostedBy: updatedRepost,
+           return res.status(200).json({
+                updatedRepost,
                 repostCount: post.repostCount - 1
             });
         } else {
@@ -300,10 +299,9 @@ export const repostPost = async (req, res) => {
         }
         await post.save()
         const updatedRepost = post.repostedBy
-        res.status(200).json({
-            message: 'Post reposted successfully',
-            repostedBy: updatedRepost,
-            repostCount: post.repostCount,
+       return res.status(200).json({
+            updatedRepost,
+            repostCount: post.repostCount || 0
         });
     } catch (error) {
         console.error("Error in repostPost controller", error);

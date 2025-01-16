@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "react-hot-toast"
 import LoadingSpinner from "./LoadingSpinner";
 const Post = ({ post }) => {
+
     const [comment, setComment] = useState("");
     const { data: authUser } = useQuery({
         queryKey: ["authUser"],
@@ -19,7 +20,6 @@ const Post = ({ post }) => {
 
     const formatDate = (dateString) => {
         const now = new Date();
-
         const postDate = new Date(dateString);
         const diffInSeconds = Math.floor((now - postDate) / 1000);
         const minutes = Math.floor(diffInSeconds / 60);
@@ -164,11 +164,14 @@ const Post = ({ post }) => {
                 throw new Error(error)
             }
         },
-        onSuccess: (updatedRepost) => {
+        onSuccess: (updatedData) => {
             queryClient.setQueryData(["posts"], (oldData) => {
                 return oldData.map((p) => {
                     if (p._id === post._id) {
-                        return { ...p, repostedBy: updatedRepost };
+                        return { ...p,
+                            repostedBy: updatedData.updatedRepost,
+                            repostCount: updatedData.repostCount 
+                         };
                     }
                     return p;
                 });
