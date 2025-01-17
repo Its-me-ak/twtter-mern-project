@@ -167,3 +167,33 @@ export const updateUserProfile = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+export const getUserFollowings = async (req, res) => {
+    const {username} = req.params
+    try {
+        const user = await UserModel.findOne({ username }).select("following");
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        const followings = await UserModel.find({ _id: { $in: user.following } }).select("-password")
+        res.status(200).json(followings);
+    } catch (error) {
+        console.error("Error in getUserFollowings", error);
+        res.status(500).json({ error: error.message });
+    }
+} 
+
+    export const getUserFollowers = async (req, res) => {
+        const { username } = req.params
+        try {
+            const user = await UserModel.findOne({ username }).select("followers");
+            if (!user) {
+                return res.status(404).json({ error: "User not found" });
+            }
+            const followers = await UserModel.find({ _id: { $in: user.followers } }).select("-password")
+            res.status(200).json(followers);
+        } catch (error) {
+            console.error("Error in getUserFollowers", error);
+            res.status(500).json({ error: error.message });
+        }
+    }
