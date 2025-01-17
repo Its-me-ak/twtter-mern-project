@@ -375,7 +375,21 @@ export const getUserPosts = async (req, res) => {
                 select: '-password -email'
             })
 
-        res.status(200).json(userPosts)
+        // Fetch the reposted posts
+        const repostedPosts = await PostModel.find({ _id: { $in: user.repostedPosts } })
+            .sort({ createdAt: -1 })
+            .populate({
+                path: 'user',
+                select: '-password -email',
+            })
+            .populate({
+                path: 'comments.user',
+                select: '-password -email',
+            });
+            
+        const allPosts = [...userPosts, ...repostedPosts];
+        res.status(200).json(allPosts);
+
     } catch (error) {
         console.error("Error in getUserPosts controller", error);
         res.status(500).json({ error: 'Internal Server Error', error });
