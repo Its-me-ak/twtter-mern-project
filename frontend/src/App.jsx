@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css'
 import SignUpPage from './pages/auth/signup/SignUpPage';
 import LoginPage from './pages/auth/login/LoginPage';
@@ -11,8 +11,11 @@ import { Toaster } from 'react-hot-toast'
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import BookmarkPage from './pages/bookmark/BookmarkPage';
+import MessagePage from './pages/message/MessagePage';
+import FollowingAndFollowersPage from './pages/profile/followingAndFollowers/FollowingAndFollowersPage';
 
 function App() {
+  const location = useLocation()
   const {data:authUser, isLoading } = useQuery({
     queryKey: ['authUser'],
     // we use queryKey to give a unique name to our query function and refer to it later 
@@ -45,8 +48,10 @@ function App() {
         <Route path="/notifications" element={authUser ? <NotificationPage /> : <Navigate to={'/login'} />  } />
         <Route path="/profile/:username" element={authUser ? <ProfilePage /> : <Navigate to={'/login'} />} />
         <Route path="/bookmarkes" element={authUser ? <BookmarkPage userId={authUser.user._id} /> : <Navigate to={'/login'} />} />
+        <Route path="/messages" element={authUser ? <MessagePage /> : <Navigate to={'/login'} />} />
+        <Route path="/following/:username" element={authUser ? <FollowingAndFollowersPage /> : <Navigate to={'/login'} />} />
       </Routes>
-      {authUser && <RightPanel />}
+      {authUser && location.pathname !== '/messages' && <RightPanel />}
     </div>
   );
 }

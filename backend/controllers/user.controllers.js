@@ -167,7 +167,7 @@ export const updateUserProfile = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
-
+ 
 export const getUserFollowings = async (req, res) => {
     const {username} = req.params
     try {

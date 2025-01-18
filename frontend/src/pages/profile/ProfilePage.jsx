@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import Posts from "../../components/common/Posts";
 import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkeleton";
@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 const ProfilePage = () => {
     const queryClient = useQueryClient()
     const { username } = useParams()
+    const navigate = useNavigate()
     const { data: user, isLoading, refetch, isRefetching } = useQuery({
         queryKey: ['userProfile'],
         queryFn: async () => {
@@ -23,7 +24,7 @@ const ProfilePage = () => {
                 const response = await fetch(`/api/users/profile/${username}`);
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || "Failed to fetch user data");
-                console.log('User', data);
+                // console.log('User', data);
                 return data;
             } catch (error) {
                 throw new Error(error)
@@ -58,8 +59,8 @@ const ProfilePage = () => {
     const isFollowing = authUser.user?.following.includes(user?._id)
 
     // updating user profile
-    const {mutate:updateProfile, isPending:isUpdatingProfile} = useMutation({
-        mutationFn:async()=>{
+    const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation({
+        mutationFn: async () => {
             try {
                 const response = await fetch('/api/users/update', {
                     method: 'POST',
@@ -83,8 +84,8 @@ const ProfilePage = () => {
             setProfileImg(null)
             setCoverImg(null)
             Promise.all([
-                    queryClient.invalidateQueries({ queryKey: ["authUser"] }),
-                    queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
+                queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+                queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
             ])
         },
         onError: (error) => {
@@ -126,9 +127,7 @@ const ProfilePage = () => {
                     {!isLoading && !isRefetching && user && (
                         <>
                             <div className='flex gap-10 px-4 py-2 items-center'>
-                                <Link to='/'>
-                                    <FaArrowLeft className='w-4 h-4' />
-                                </Link>
+                                <FaArrowLeft className='w-4 h-4' onClick={() => navigate(-1)} />
                                 <div className='flex flex-col'>
                                     <p className='font-bold text-lg'>{user?.fullName}</p>
                                     <span className='text-sm text-slate-500'>{posts?.length} posts</span>
@@ -231,14 +230,21 @@ const ProfilePage = () => {
                                         </span>
                                     </div>
                                 </div>
-                                <div className='flex gap-2'>
-                                    <div className='flex gap-1 items-center'>
-                                        <span className='font-bold text-xs'>{user?.following.length}</span>
-                                        <span className='text-slate-500 text-xs'>Following</span>
+                                <div className='flex gap-4'>
+                                    <div className='flex gap-1 items-center hover:border-b cursor-pointer'>
+                                        <Link
+                                            to={`/following/${authUser.user?.username}`}>
+                                            <span className='font-bold text-md'>{user?.following.length}</span>
+                                            <span className='text-slate-500 text-md ms-1'>Following</span>
+                                        </Link>
                                     </div>
-                                    <div className='flex gap-1 items-center'>
-                                        <span className='font-bold text-xs'>{user?.followers.length}</span>
-                                        <span className='text-slate-500 text-xs'>Followers</span>
+                                    <div className='flex gap-1 items-center hover:border-b cursor-pointer'>
+                                        <Link
+                                            to={`/following/${authUser.user?.username}`}
+                                        >
+                                            <span className='font-bold text-md'>{user?.followers.length}</span>
+                                            <span className='text-slate-500 text-md ms-1'>Followers</span>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>

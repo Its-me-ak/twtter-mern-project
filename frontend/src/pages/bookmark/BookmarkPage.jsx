@@ -4,14 +4,13 @@ import toast from "react-hot-toast"
 import Post from "../../components/common/Post";
 
 const BookmarkPage = ({ userId }) => {
-    console.log(userId);
     const { data: bookmarksData, isLoading, error } = useQuery({
         queryKey: ["bookmarks"],
         queryFn: async () => {
             try {
                 const response = await fetch(`/api/posts/bookmarks/${userId}`);
                 const data = await response.json();
-                console.log('All bookmarks ', data);
+                // console.log('All bookmarks ', data);
                 if (!response.ok) throw new Error(data.error || "Failed to fetch bookmarked posts");
                 return data;
             } catch (error) {
@@ -32,7 +31,7 @@ const BookmarkPage = ({ userId }) => {
                 {bookmarksData?.length === 0 && <div className='text-center p-4 font-bold'>No notifications 🤔</div>}
                 {
                     bookmarksData.map((bookmark) => {
-                        console.log('Rendering post: ', bookmark);
+                        // console.log('Rendering post: ', bookmark);
                         return <Post key={bookmark._id} post={bookmark} />
                     })
                 }
