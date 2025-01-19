@@ -18,7 +18,7 @@ const ProfilePage = () => {
     const { username } = useParams()
     const navigate = useNavigate()
     const { data: user, isLoading, refetch, isRefetching } = useQuery({
-        queryKey: ['userProfile'],
+        queryKey: ['user'],
         queryFn: async () => {
             try {
                 const response = await fetch(`/api/users/profile/${username}`);
@@ -29,7 +29,8 @@ const ProfilePage = () => {
             } catch (error) {
                 throw new Error(error)
             }
-        }
+        },
+        retry: false,
     })
 
     const { data: authUser } = useQuery({
@@ -233,14 +234,14 @@ const ProfilePage = () => {
                                 <div className='flex gap-4'>
                                     <div className='flex gap-1 items-center hover:border-b cursor-pointer'>
                                         <Link
-                                            to={`/following/${authUser.user?.username}`}>
+                                            to={`/following/${user?.username}`}>
                                             <span className='font-bold text-md'>{user?.following.length}</span>
                                             <span className='text-slate-500 text-md ms-1'>Following</span>
                                         </Link>
                                     </div>
                                     <div className='flex gap-1 items-center hover:border-b cursor-pointer'>
                                         <Link
-                                            to={`/following/${authUser.user?.username}`}
+                                            to={`/following/${user?.username}`}
                                         >
                                             <span className='font-bold text-md'>{user?.followers.length}</span>
                                             <span className='text-slate-500 text-md ms-1'>Followers</span>

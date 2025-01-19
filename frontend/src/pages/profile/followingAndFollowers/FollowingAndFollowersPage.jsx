@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import useFollow from "../../../hooks/useFollow";
 import { FaArrowLeft } from "react-icons/fa6";
+import ProfileSkeleton from "../../../components/skeletons/ProfileSkeleton";
 
 
 const FollowingAndFollowersPage = () => {
@@ -36,8 +36,9 @@ const FollowingAndFollowersPage = () => {
     });
 
     const { data: user } = useQuery({
-        queryKey: ['userProfile']
+        queryKey: ['user']
     })
+
 
     return (
         <div className="flex-[4_4_0] border-r border-gray-700 min-h-screen p-0">
@@ -76,41 +77,49 @@ const FollowingAndFollowersPage = () => {
                 {activeTab === "followers" && (
                     <>
                         {followersLoading ? (
-                            <LoadingSpinner size="lg" />
+                            <ProfileSkeleton />
                         ) : (
                             <ul>
-                                {followers?.map((user) => (
-                                    <li key={user._id} className=" flex space-x-2 mb-4 p-3 hover:bg-[#111]/[0.45]">
-                                        <Link to={`/profile/${user.username}`}>
-                                            <img
-                                                src={user.profileImg || "/avatar-placeholder.png"}
-                                                alt={user.username}
-                                                className="w-12 h-12 rounded-full object-cover"
+                                {followers?.map((follower) => {
+                                    const isUserFollowed = follower.followers?.includes(user._id);
+                                    return (
+                                        <li key={user._id} className=" flex space-x-2 mb-4 p-3 hover:bg-[#111]/[0.45]">
+                                            <Link to={`/profile/${user.username}`}>
+                                                <img
+                                                    src={follower.profileImg || "/avatar-placeholder.png"}
+                                                    alt={follower.username}
+                                                    className="w-12 h-12 rounded-full object-cover"
 
-                                            />
-                                        </Link>
-                                        <div className="flex flex-col">
-                                            <div className="flex justify-between items-center w-[570px]">
-                                                <span>
-                                                    <p className="text-white font-medium">{user.fullName}</p>
-                                                    <p className="text-gray-500">@{user.username}</p>
-                                                </span>
-                                                <button
-                                                    className={`btn btn-outline rounded-full btn-sm ${hoverdUser === user._id ? "btn-error" : ""
-                                                        }`}
-                                                    onMouseEnter={() => setHoveredUser(user._id)}
-                                                    onMouseLeave={() => setHoveredUser(null)}
-                                                    onClick={() => followUser(user._id)}
-                                                >
-                                                    {hoverdUser === user._id ? "Unfollow" : user._id ? "Following" : "Follow"}
-                                                </button>
+                                                />
+                                            </Link>
+                                            <div className="flex flex-col">
+                                                <div className="flex justify-between items-center w-[570px]">
+                                                    <span>
+                                                        <p className="text-white font-medium">{follower.fullName}</p>
+                                                        <p className="text-gray-500">@{follower.username} <span className="text-[12px] bg-gray-700 px-1 ms-2 rounded-sm text-gray-400">Follows you</span></p>
+                                                    </span>
+                                                    <button
+                                                        className={`btn btn-outline rounded-full btn-sm ${hoverdUser === user._id ? "btn-error" : ""
+                                                            }`}
+                                                        onMouseEnter={() => setHoveredUser(user._id)}
+                                                        onMouseLeave={() => setHoveredUser(null)}
+                                                        onClick={() => followUser(follower._id)}
+                                                    >
+                                                        {hoverdUser === user._id
+                                                            ? "Unfollow"
+                                                            : isUserFollowed
+                                                                ? "Following"
+                                                                : "Follow"}
+                                                    </button>
+                                                </div>
+                                                <p className="text-gray-400 text-sm">
+                                                    {follower.bio}
+                                                </p>
                                             </div>
-                                            <p className="text-gray-400 text-sm">
-                                                {user.bio}
-                                            </p>
-                                        </div>
-                                    </li>
-                                ))}
+                                        </li>
+                                    )
+
+                                })}
                             </ul>
                         )}
                     </>
@@ -119,7 +128,7 @@ const FollowingAndFollowersPage = () => {
                 {activeTab === "following" && (
                     <>
                         {followingLoading ? (
-                            <p>Loading following...</p>
+                            <ProfileSkeleton />
                         ) : (
                             <ul>
                                 {followingUser?.map((user) => (

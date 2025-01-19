@@ -16,7 +16,8 @@ const useFollow = () => {
             Promise.all([
                 queryClint.invalidateQueries({ queryKey: ["suggestedUsers"] }),
                 queryClint.invalidateQueries({ queryKey: ["authUser"] }),
-                queryClint.invalidateQueries({ queryKey: ["followingUser"] })
+                queryClint.invalidateQueries({ queryKey: ["followingUser"] }),
+                queryClint.invalidateQueries({ queryKey: ["followersUser"] })
             ])
         },
         onError: (err) => {
