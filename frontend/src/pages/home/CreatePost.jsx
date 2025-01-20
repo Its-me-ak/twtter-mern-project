@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const CreatePost = () => {
   const [text, setText] = useState("");
@@ -56,9 +57,12 @@ const CreatePost = () => {
     }
   };
 
+  const navigate = useNavigate()
+  const isDisabled = !text && !image
+
   return (
     <div className='flex p-4 items-start gap-4 border-b border-gray-700'>
-      <div className='avatar'>
+      <div className='avatar cursor-pointer' onClick={() => navigate(`/profile/${authUser.user.username}`)}>
         <div className='w-8 rounded-full'>
           <img src={authUser?.user?.profileImg || "/avatar-placeholder.png"} />
         </div>
@@ -94,7 +98,9 @@ const CreatePost = () => {
           <input type='file'
             accept="image/*"
             hidden ref={imgRef} onChange={handleImgChange} />
-          <button className='btn btn-primary rounded-full btn-sm text-white px-4'>
+          <button className='btn btn-primary rounded-full btn-sm text-white px-4'
+          disabled={isDisabled}
+          >
             {isPending ? "Posting..." : "Post"}
           </button>
         </div>

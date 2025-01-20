@@ -33,21 +33,28 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
     try {
-        const {text, image} = req.body
+        const {text} = req.body
+        let {image} = req.body
         const {id: receiverId} = req.params
         const senderId = req.user._id
 
-        let imageUrl;
+        if (!text && !image) {
+            return res.status(400).json({ error: 'You cannot send empty message' });
+        }
         if (image) {
-            const uploadResponse = await cloudinary.uploader.upload(image)
-            imageUrl = uploadResponse.secure_url;
+            const uploadedImageUrl = await cloudinary.uploader.upload(image)
+            if (!uploadedImageUrl) {
+                return res.status(500).json({ error: 'Error while uploading image' });
+            }
+            console.log(uploadedImageUrl);
+            image = uploadedImageUrl.secure_url;
         }
         
         const newMessage = new MessageModel({
             senderId,
             receiverId,
             text,
-            image: imageUrl
+            image
         })
         await newMessage.save()
         // TODO: realtime messages functionality goes here with the help of soket.io

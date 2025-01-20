@@ -47,3 +47,7 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     dbConnect()
 });
+
+//   "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
+// "start": "cross-env NODE_ENV=production node backend/server.js"
+// "dev": "cross-env NODE_ENV=development nodemon backend/server.js",
