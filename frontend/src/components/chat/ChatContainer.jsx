@@ -89,7 +89,7 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
                     </p>
                 </div>
             )}
-            <ChatMessageInput />
+            <ChatMessageInput selectedUserId={selectedUserId} />
         </div>
     );
 };

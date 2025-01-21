@@ -1,13 +1,102 @@
+import { useMutation } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { BsImage, BsEmojiSmile } from "react-icons/bs";
-import { MdSend } from "react-icons/md";
+import { MdSend, MdCancel } from "react-icons/md";
 
-const ChatMessageInput = () => {
+const ChatMessageInput = ({ selectedUserId }) => {
+    console.log(selectedUserId);
+    
+    const [message, setMessage] = useState("")
+    const [image, setImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null)
+    const fileInputRef = useRef(null)
+
+    const { mutate: sendMessage, isPending: isMessageSending } = useMutation({
+        mutationFn: async ({text, image}) => {
+            try {
+                const response = await fetch(`/api/messages/send/${selectedUserId._id}`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text,
+                        image
+                    })
+                })
+                const data = await response.json();
+                console.log(data);
+                if (!response.ok) throw new Error(data.error || "Failed to send message");
+                return data;
+            } catch (error) {
+                throw new Error(error)
+            }
+        },
+        onSuccess: () => {
+            setMessage('');
+            setImage(null);
+            setImagePreview(null);
+            // queryClient.invalidateQueries({ queryKey: ["posts"] });
+        },
+        onError: (err) => {
+            toast.error(err.message || "Failed to send a message");
+        }
+    })
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please select an image file");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImage(file);
+            setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    const removeImagePreview = () => {
+        setImage(null);
+        setImagePreview(null);
+        if(fileInputRef.current) fileInputRef.current.value = ""
+    }
+
+    const handleSendMessage = (e) => {
+        e.preventDefault();
+        if(!message.trim() && !imagePreview ) return
+        sendMessage({ text: message.trim(), image:imagePreview });
+    }
     return (
         <div className="p-2 w-full absolute bottom-0 left-0 border-t border-gray-700 bg-base-300">
-            <form className="flex items-center gap-2">
+            {imagePreview && (
+                <div className="mb-3 flex items-center gap-2">
+                    <div className="relative">
+                        <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
+                        />
+                        <button
+                            onClick={removeImagePreview}
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
+              flex items-center justify-center"
+                            type="button"
+                        >
+                            <MdCancel className="size-3" />
+                        </button>
+                    </div>
+                </div>
+            )}
+            <form className="flex items-center gap-2" onSubmit={handleSendMessage}>
                 {/* Left icons */}
                 <div className="flex gap-3 text-blue-500">
-                    <button type="button" className="hover:text-blue-400">
+                    <button type="button" className="hover:text-blue-400"
+                    onClick={() => fileInputRef.current?.click()}
+                    >
                         <BsImage size={20} />
                     </button>
                     <button type="button" className="hover:text-blue-400">
@@ -18,7 +107,16 @@ const ChatMessageInput = () => {
                 {/* Input field */}
                 <div className="flex-1">
                     <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                    />
+                    <input
                         type="text"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
                         className="w-full input input-bordered rounded-full input-sm sm:input-md bg-base-200 placeholder-gray-400 text-white"
                         placeholder="Start a new message..."
                     />
@@ -27,7 +125,8 @@ const ChatMessageInput = () => {
                 {/* Send button */}
                 <button
                     type="submit"
-                    className="btn btn-circle btn-sm sm:btn-md border-none text-white"
+                    disabled={!message.trim() && !imagePreview}
+                    className="btn btn-circle btn-sm sm:btn-md border-none text-white bg-primary hover:bg-cyan-600"
                 >
                     <MdSend/>
                 </button>
