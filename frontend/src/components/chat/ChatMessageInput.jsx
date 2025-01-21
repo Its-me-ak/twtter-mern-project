@@ -3,12 +3,10 @@ import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { BsImage, BsEmojiSmile } from "react-icons/bs";
 import { MdSend, MdCancel } from "react-icons/md";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 const ChatMessageInput = ({ selectedUserId }) => {
-    console.log(selectedUserId);
-    
     const [message, setMessage] = useState("")
-    const [image, setImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null)
     const fileInputRef = useRef(null)
 
@@ -35,9 +33,7 @@ const ChatMessageInput = ({ selectedUserId }) => {
         },
         onSuccess: () => {
             setMessage('');
-            setImage(null);
             setImagePreview(null);
-            // queryClient.invalidateQueries({ queryKey: ["posts"] });
         },
         onError: (err) => {
             toast.error(err.message || "Failed to send a message");
@@ -53,14 +49,12 @@ const ChatMessageInput = ({ selectedUserId }) => {
 
         const reader = new FileReader();
         reader.onloadend = () => {
-            setImage(file);
             setImagePreview(reader.result);
         };
         reader.readAsDataURL(file);
     }
 
     const removeImagePreview = () => {
-        setImage(null);
         setImagePreview(null);
         if(fileInputRef.current) fileInputRef.current.value = ""
     }
@@ -68,7 +62,7 @@ const ChatMessageInput = ({ selectedUserId }) => {
     const handleSendMessage = (e) => {
         e.preventDefault();
         if(!message.trim() && !imagePreview ) return
-        sendMessage({ text: message.trim(), image:imagePreview });
+        sendMessage({ text: message.trim(), image: imagePreview});
     }
     return (
         <div className="p-2 w-full absolute bottom-0 left-0 border-t border-gray-700 bg-base-300">
@@ -78,15 +72,15 @@ const ChatMessageInput = ({ selectedUserId }) => {
                         <img
                             src={imagePreview}
                             alt="Preview"
-                            className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
+                            className="w-28 h-24 object-cover rounded-lg border border-zinc-700"
                         />
                         <button
                             onClick={removeImagePreview}
-                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
+                            className="absolute top-0 right-1 w-6 h-6 rounded-full bg-black/70
               flex items-center justify-center"
                             type="button"
                         >
-                            <MdCancel className="size-3" />
+                            <MdCancel className="size-5" />
                         </button>
                     </div>
                 </div>
@@ -128,7 +122,8 @@ const ChatMessageInput = ({ selectedUserId }) => {
                     disabled={!message.trim() && !imagePreview}
                     className="btn btn-circle btn-sm sm:btn-md border-none text-white bg-primary hover:bg-cyan-600"
                 >
-                    <MdSend/>
+                    {isMessageSending ? <LoadingSpinner size="sm"/> : <MdSend />}
+                  
                 </button>
             </form>
         </div>

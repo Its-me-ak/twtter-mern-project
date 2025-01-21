@@ -2,11 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import ChatHeader from "./ChatHeader";
 import ChatMessageInput from "./ChatMessageInput";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { MessageCircle } from "lucide-react";
 import MessageSkeleton from "../skeletons/MessageSkeleton";
 
 const ChatContainer = ({ userId, authUser, selectedUserId }) => {
+    const chatEndPointRef = useRef(null)
     const { data: chatMessages, isLoading: isMessageLoading, error: isMessageError, refetch } = useQuery({
         queryKey: ['chatMessages'],
         queryFn: async () => {
@@ -23,6 +24,16 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
     useEffect(() => {
         refetch() // Fetch new messages when component re-renders or userId changes
     }, [userId, refetch])
+
+    useEffect(() => {
+        if (chatEndPointRef.current && chatMessages?.length > 0) {
+            chatEndPointRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'end',
+            });
+        }
+    }, [chatMessages]);
+
 
 
     const formatMessageTime = (dateString) => {
@@ -53,7 +64,7 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
 
     if (isMessageLoading) {
         return (
-            <div className="flex-1 flex flex-col overflow-auto">
+            <div className="flex-1 flex flex-col overflow-auto custom-scrollbar">
                 <ChatHeader selectedUserId={selectedUserId} />
                 <MessageSkeleton />
                 <ChatMessageInput />
@@ -67,28 +78,44 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
     }
 
     return (
-        <div className="h-screen overflow-auto">
+        <div className="h-screen overflow-auto custom-scrollbar">
             <ChatHeader selectedUserId={selectedUserId} />
-            {chatMessages?.length > 0 ? (
-                chatMessages.map((message) => (
-                    <div key={message._id} className={`mb-2 px-5 ${authUser === message.senderId ? 'chat-end' : 'chat-start'}`}>
-                        <div className={`chat-bubble ${authUser === message.senderId ? 'bg-primary' : ''}`}>
-                            <p className="text-sm">{message.text}</p>
+            <div className="mb-20">
+                {chatMessages?.length > 0 ? (
+                    chatMessages.map((message) => (
+                        <div key={message._id} className={`mb-2 px-5 ${authUser === message.senderId ? 'chat-end' : 'chat-start'}`}>
+                            <div
+                                className={`chat-bubble rounded-md flex flex-col ${message.image
+                                    ? 'bg-transparent p-0'
+                                    : authUser === message.senderId
+                                        ? 'bg-primary'
+                                        : ''
+                                    }`}
+                            >
+                                {message.image && (
+                                    <img
+                                        src={message.image}
+                                        alt={message.senderUsername}
+                                        className="w-full h-full object-cover rounded-2xl"
+                                    />
+                                )}
+                                {message.text && <p>{message.text}</p>}
+                            </div>
+                            <div className="chat-footer">
+                                {formatMessageTime(message.createdAt)}
+                            </div>
                         </div>
-                        <div className="chat-footer">
-                            {formatMessageTime(message.createdAt)}
-                        </div>
+                    ))
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center text-gray-600">
+                        <MessageCircle className="w-12 h-12 text-gray-400 mb-4" />
+                        <h2 className="text-lg font-bold">No messages yet</h2>
+                        <p className="text-sm">
+                            Send a message to start the conversation.
+                        </p>
                     </div>
-                ))
-            ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center text-gray-600">
-                    <MessageCircle className="w-12 h-12 text-gray-400 mb-4" />
-                    <h2 className="text-lg font-bold">No messages yet</h2>
-                    <p className="text-sm">
-                        Send a message to start the conversation.
-                    </p>
-                </div>
-            )}
+                )}
+            </div>
             <ChatMessageInput selectedUserId={selectedUserId} />
         </div>
     );
