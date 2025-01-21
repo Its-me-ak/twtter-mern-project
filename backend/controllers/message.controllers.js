@@ -6,7 +6,12 @@ import { v2 as cloudinary } from "cloudinary";
 export const getUsersForSidebar = async (req, res) => {
     try {
         const loggedInUserId = req.user._id
-        const filteredUsers = await UserModel.find({ _id: { $ne: loggedInUserId } }).select("-password")
+        const filteredUsers = await UserModel.find({
+            $or: [
+                { followers: loggedInUserId },
+                { following: loggedInUserId }, 
+            ],
+        }).select("-password");
         res.status(200).json(filteredUsers)
     } catch (error) {
         console.error("Error while fetching users for sidebar", error)
