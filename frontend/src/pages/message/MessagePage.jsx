@@ -18,7 +18,7 @@ const MessagePage = () => {
       </div>
 
       {/* Chat Container */}
-      <div className="w-3/5 flex flex-col border-r border-gray-700 overflow-auto relative">
+      <div className="w-3/5 flex flex-col border-r border-gray-700  relative">
         {selectedUserId ? (
           <ChatContainer userId={selectedUserId?._id} authUser={authUser.user._id} selectedUserId={selectedUserId} />
         ) : (
