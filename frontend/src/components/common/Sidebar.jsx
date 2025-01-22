@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { BsThreeDots } from "react-icons/bs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { disconnectSocket } from "../../utils/socket";
 
 const Sidebar = () => {
     const queryClient = useQueryClient()
@@ -21,6 +22,7 @@ const Sidebar = () => {
         onSuccess: () => {
             toast.success('Logged out successfully')
             queryClient.invalidateQueries({ queryKey: ["authUser"] });
+            disconnectSocket()
         },
         onError: (err) => {
             toast.error(err.message)

@@ -34,8 +34,6 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
         }
     }, [chatMessages]);
 
-
-
     const formatMessageTime = (dateString) => {
         const now = new Date();
         const messageDate = new Date(dateString);
@@ -60,8 +58,6 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
             hour12: true,
         }).format(messageDate);
     };
-
-
     if (isMessageLoading) {
         return (
             <div className="flex-1 flex flex-col overflow-auto custom-scrollbar">
@@ -116,7 +112,9 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
                     </div>
                 )}
             </div>
-            <ChatMessageInput selectedUserId={selectedUserId} />
+            <ChatMessageInput selectedUserId={selectedUserId}
+            
+            />
         </div>
     );
 };

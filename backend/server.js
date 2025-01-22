@@ -9,6 +9,7 @@ import dotenv from "dotenv"
 import dbConnect from "./db/dbConnect.js";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
+import { app, server, io } from "./lib/utils/soket.js";
 
 dotenv.config()
 cloudinary.config({
@@ -17,7 +18,6 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_SECRET_KEY,
 })
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 const __dirname = path.resolve()
 
@@ -43,7 +43,7 @@ if(process.env.NODE_ENV === 'production'){
     })
 }
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     dbConnect()
 });

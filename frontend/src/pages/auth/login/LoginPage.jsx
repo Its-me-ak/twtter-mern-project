@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
 import XSvg from "../../../components/svg/X";
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { connectSocket } from "../../../utils/socket";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -37,6 +37,7 @@ const queryClient = useQueryClient()
       toast.success("Successfully logged in");
       // refetch the authUser data as stale
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      connectSocket()
     }
   })
 
