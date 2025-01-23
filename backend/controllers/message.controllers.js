@@ -1,3 +1,4 @@
+import { io, getReceiverSocketId } from "../lib/utils/soket.js";
 import MessageModel from "../models/message.model.js"
 import UserModel from "../models/user.model.js"
 import { v2 as cloudinary } from "cloudinary";
@@ -62,7 +63,10 @@ export const sendMessage = async (req, res) => {
             image
         })
         await newMessage.save()
-        // TODO: realtime messages functionality goes here with the help of soket.io
+        const receiverSocketId = getReceiverSocketId(receiverId)
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit('newMessage', newMessage)
+        }
         res.status(201).json(newMessage)
     } catch (error) {
         console.error("Error while sending message", error)

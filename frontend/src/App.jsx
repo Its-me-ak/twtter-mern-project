@@ -34,7 +34,7 @@ function App() {
 
   useEffect(()=> {
     if(authUser){
-      connectSocket()
+      connectSocket(authUser.user._id)
     }
     return () => disconnectSocket();
   }, [authUser])

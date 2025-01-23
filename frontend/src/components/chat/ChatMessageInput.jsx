@@ -1,14 +1,16 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { BsImage, BsEmojiSmile } from "react-icons/bs";
 import { MdSend, MdCancel } from "react-icons/md";
 import LoadingSpinner from "../common/LoadingSpinner";
+import { getSocket } from "../../utils/socket";
 
 const ChatMessageInput = ({ selectedUserId }) => {
     const [message, setMessage] = useState("")
     const [imagePreview, setImagePreview] = useState(null)
     const fileInputRef = useRef(null)
+    const queryClient = useQueryClient()
 
     const { mutate: sendMessage, isPending: isMessageSending } = useMutation({
         mutationFn: async ({text, image}) => {
@@ -24,7 +26,6 @@ const ChatMessageInput = ({ selectedUserId }) => {
                     })
                 })
                 const data = await response.json();
-                console.log(data);
                 if (!response.ok) throw new Error(data.error || "Failed to send message");
                 return data;
             } catch (error) {
@@ -32,6 +33,7 @@ const ChatMessageInput = ({ selectedUserId }) => {
             }
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["chatMessages"] });
             setMessage('');
             setImagePreview(null);
         },
@@ -63,6 +65,13 @@ const ChatMessageInput = ({ selectedUserId }) => {
         e.preventDefault();
         if(!message.trim() && !imagePreview ) return
         sendMessage({ text: message.trim(), image: imagePreview});
+        const socket = getSocket();
+        if (socket) {
+            socket.emit("send_message", {
+                recipientId: selectedUserId._id, // ID of the user to send the message to
+                message: message.trim(),
+            });
+        }
     }
     return (
         <div className="p-2 w-full absolute bottom-0 left-0 border-t border-gray-700 bg-base-300">

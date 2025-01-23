@@ -5,6 +5,7 @@ import ChatMessageInput from "./ChatMessageInput";
 import { useEffect, useRef } from "react";
 import { MessageCircle } from "lucide-react";
 import MessageSkeleton from "../skeletons/MessageSkeleton";
+import { connectSocket } from "../../utils/socket";
 
 const ChatContainer = ({ userId, authUser, selectedUserId }) => {
     const chatEndPointRef = useRef(null)
@@ -13,20 +14,31 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
         queryFn: async () => {
             const response = await fetch(`/api/messages/${userId}`);
             const data = await response.json();
-            console.log('messages', data);
-
             if (!response.ok) throw new Error(data.error || "Failed to fetch chat messages");
             return data;
         },
         enabled: !!userId, // Only fetch when userId is available
     });
-
     useEffect(() => {
         refetch() // Fetch new messages when component re-renders or userId changes
     }, [userId, refetch])
 
     useEffect(() => {
-        if (chatEndPointRef.current && chatMessages?.length > 0) {
+        const clientId = authUser
+        const socket = connectSocket(clientId);
+        // Listen for real-time messages
+        socket.on("receive_message", async (newMessage) => {
+            console.log("Received a new message:", newMessage);
+            refetch();
+        });
+
+        return () => {
+            socket.off("receive_message");
+        };
+    }, [refetch, userId, authUser]);
+
+    useEffect(() => {
+        if (chatEndPointRef.current && chatMessages) {
             chatEndPointRef.current.scrollIntoView({
                 behavior: 'smooth',
                 block: 'end',
@@ -112,9 +124,8 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
                     </div>
                 )}
             </div>
-            <ChatMessageInput selectedUserId={selectedUserId}
-            
-            />
+            <ChatMessageInput selectedUserId={selectedUserId}/>
+            <div ref={chatEndPointRef} />
         </div>
     );
 };
