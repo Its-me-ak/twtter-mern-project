@@ -3,12 +3,13 @@ import toast from "react-hot-toast";
 import { BsImage, BsEmojiSmile } from "react-icons/bs";
 import { MdSend, MdCancel } from "react-icons/md";
 import useSendMessage from "../../hooks/useSendMessage";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 const ChatMessageInput = () => {
     const [message, setMessage] = useState("")
     const [imagePreview, setImagePreview] = useState(null)
     const fileInputRef = useRef(null)
-    const { sendMessage } = useSendMessage()
+    const { sendMessage, loading } = useSendMessage()
     
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -101,7 +102,7 @@ const ChatMessageInput = () => {
                     disabled={!message.trim() && !imagePreview}
                     className="btn btn-circle btn-sm sm:btn-md border-none text-white bg-primary hover:bg-cyan-600"
                 >
-                     <MdSend />
+                    { loading ? <LoadingSpinner size="sm"/> : <MdSend />}
                   
                 </button>
             </form>
