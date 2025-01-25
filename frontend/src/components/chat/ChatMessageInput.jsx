@@ -1,47 +1,15 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { BsImage, BsEmojiSmile } from "react-icons/bs";
 import { MdSend, MdCancel } from "react-icons/md";
-import LoadingSpinner from "../common/LoadingSpinner";
-import { getSocket } from "../../utils/socket";
+import useSendMessage from "../../hooks/useSendMessage";
 
-const ChatMessageInput = ({ selectedUserId }) => {
+const ChatMessageInput = () => {
     const [message, setMessage] = useState("")
     const [imagePreview, setImagePreview] = useState(null)
     const fileInputRef = useRef(null)
-    const queryClient = useQueryClient()
-
-    const { mutate: sendMessage, isPending: isMessageSending } = useMutation({
-        mutationFn: async ({text, image}) => {
-            try {
-                const response = await fetch(`/api/messages/send/${selectedUserId._id}`, {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        text,
-                        image
-                    })
-                })
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || "Failed to send message");
-                return data;
-            } catch (error) {
-                throw new Error(error)
-            }
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["chatMessages"] });
-            setMessage('');
-            setImagePreview(null);
-        },
-        onError: (err) => {
-            toast.error(err.message || "Failed to send a message");
-        }
-    })
-
+    const { sendMessage } = useSendMessage()
+    
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (!file.type.startsWith("image/")) {
@@ -61,16 +29,18 @@ const ChatMessageInput = ({ selectedUserId }) => {
         if(fileInputRef.current) fileInputRef.current.value = ""
     }
 
-    const handleSendMessage = (e) => {
+    const handleSendMessage = async (e) => {
         e.preventDefault();
         if(!message.trim() && !imagePreview ) return
-        sendMessage({ text: message.trim(), image: imagePreview});
-        const socket = getSocket();
-        if (socket) {
-            socket.emit("send_message", {
-                recipientId: selectedUserId._id, // ID of the user to send the message to
-                message: message.trim(),
-            });
+        try {
+            await sendMessage({
+                text: message.trim(),
+                image: imagePreview,
+            })
+            setMessage('');
+            setImagePreview(null);
+        } catch (error) {
+            toast.error(error.message || "Failed to send a message");
         }
     }
     return (
@@ -131,7 +101,7 @@ const ChatMessageInput = ({ selectedUserId }) => {
                     disabled={!message.trim() && !imagePreview}
                     className="btn btn-circle btn-sm sm:btn-md border-none text-white bg-primary hover:bg-cyan-600"
                 >
-                    {isMessageSending ? <LoadingSpinner size="sm"/> : <MdSend />}
+                     <MdSend />
                   
                 </button>
             </form>

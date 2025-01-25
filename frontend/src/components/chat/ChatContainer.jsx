@@ -1,50 +1,29 @@
-import { useQuery } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+// import { useQuery } from "@tanstack/react-query";
+// import toast from "react-hot-toast";
 import ChatHeader from "./ChatHeader";
 import ChatMessageInput from "./ChatMessageInput";
 import { useEffect, useRef } from "react";
 import { MessageCircle } from "lucide-react";
 import MessageSkeleton from "../skeletons/MessageSkeleton";
-import { connectSocket } from "../../utils/socket";
+// import { connectSocket } from "../../utils/socket";
+import useGetMessage from "../../hooks/useGetMessages";
+import useConversation from "../../zustand/useConversation";
+import useGetSocketMessage from "../../hooks/useGetSocketMessages";
 
-const ChatContainer = ({ userId, authUser, selectedUserId }) => {
+const ChatContainer = ({ authUser, }) => {
+    const { selectedConversation } = useConversation()
     const chatEndPointRef = useRef(null)
-    const { data: chatMessages, isLoading: isMessageLoading, error: isMessageError, refetch } = useQuery({
-        queryKey: ['chatMessages'],
-        queryFn: async () => {
-            const response = await fetch(`/api/messages/${userId}`);
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || "Failed to fetch chat messages");
-            return data;
-        },
-        enabled: !!userId, // Only fetch when userId is available
-    });
+    const {messages, loading} = useGetMessage()
+    useGetSocketMessage()
+    
     useEffect(() => {
-        refetch() // Fetch new messages when component re-renders or userId changes
-    }, [userId, refetch])
-
-    useEffect(() => {
-        const clientId = authUser
-        const socket = connectSocket(clientId);
-        // Listen for real-time messages
-        socket.on("receive_message", async (newMessage) => {
-            console.log("Received a new message:", newMessage);
-            refetch();
-        });
-
-        return () => {
-            socket.off("receive_message");
-        };
-    }, [refetch, userId, authUser]);
-
-    useEffect(() => {
-        if (chatEndPointRef.current && chatMessages) {
+        if (chatEndPointRef.current && messages) {
             chatEndPointRef.current.scrollIntoView({
                 behavior: 'smooth',
                 block: 'end',
             });
         }
-    }, [chatMessages]);
+    }, [messages]);
 
     const formatMessageTime = (dateString) => {
         const now = new Date();
@@ -70,10 +49,10 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
             hour12: true,
         }).format(messageDate);
     };
-    if (isMessageLoading) {
+    if (loading) {
         return (
             <div className="flex-1 flex flex-col overflow-auto custom-scrollbar">
-                <ChatHeader selectedUserId={selectedUserId} />
+                <ChatHeader selectedConversation={selectedConversation} />
                 <MessageSkeleton />
                 <ChatMessageInput />
 
@@ -81,16 +60,12 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
         );
     }
 
-    if (isMessageError) {
-        toast.error("Failed to fetch chat messages");
-    }
-
     return (
         <div className="h-screen overflow-auto custom-scrollbar">
-            <ChatHeader selectedUserId={selectedUserId} />
+            <ChatHeader selectedConversation={selectedConversation} />
             <div className="mb-20">
-                {chatMessages?.length > 0 ? (
-                    chatMessages.map((message) => (
+                {messages?.length > 0 ? (
+                    messages.map((message) => (
                         <div key={message._id} className={`mb-2 px-5 ${authUser === message.senderId ? 'chat-end' : 'chat-start'}`}>
                             <div
                                 className={`chat-bubble rounded-md flex flex-col ${message.image
@@ -124,7 +99,7 @@ const ChatContainer = ({ userId, authUser, selectedUserId }) => {
                     </div>
                 )}
             </div>
-            <ChatMessageInput selectedUserId={selectedUserId}/>
+            <ChatMessageInput selectedConversation={selectedConversation}/>
             <div ref={chatEndPointRef} />
         </div>
     );

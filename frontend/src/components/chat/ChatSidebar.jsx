@@ -1,29 +1,30 @@
-import { useQuery } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+// import { useQuery } from "@tanstack/react-query";
+// import toast from "react-hot-toast";
 import ProfileSkeleton from "../skeletons/ProfileSkeleton";
 import { Link } from "react-router-dom";
 import { BsThreeDots } from "react-icons/bs";
 import { MdOutlinePushPin } from "react-icons/md";
 import { FiBellOff } from "react-icons/fi";
 import { RiFlag2Line, RiDeleteBinLine } from "react-icons/ri";
+// import { useEffect, useState } from "react";
+// import { io } from "socket.io-client";
+import useGetChatUsers from "../../hooks/useGetChatUsers";
+import useConversation from "../../zustand/useConversation";
+import { useSocketContext } from "../../context/SoketContext";
 
-const ChatSidebar = ({ onSelectUser, selectedUserId }) => {
-    const { data: chatUsers, isLoading: isUserLoading, error: isUserError } = useQuery({
-        queryKey: ['chatUser'],
-        queryFn: async () => {
-            const response = await fetch('/api/messages/users');
-            const data = await response.json();
-            console.log("chatUser ", data);
-            if (!response.ok) throw new Error(data.error || "Failed to fetch chat users");
-            return data;
-        },
-    });
+const ChatSidebar = () => {
+    const {chatUsers, loading} = useGetChatUsers()
+    const { selectedConversation , setSelectedConversation } = useConversation()
+    
 
-    if (isUserLoading) return <ProfileSkeleton />;
-    if (isUserError) {
-        toast.error("Failed to fetch chat users");
-        return null;
-    }
+    const { onlineUsers } = useSocketContext()
+    console.log(onlineUsers);
+    
+    if (loading) return <ProfileSkeleton />;
+    // if (isUserError) {
+    //     toast.error("Failed to fetch chat users");
+    //     return null;
+    // }
 
     return (
         <div >
@@ -31,14 +32,18 @@ const ChatSidebar = ({ onSelectUser, selectedUserId }) => {
             {chatUsers.map((user) => (
                 <div
                     key={user._id}
-                    className={`cursor-pointer flex justify-between items-center px-2 py-4  duration-300 ${selectedUserId === user._id ? 'bg-gray-600/60 border-r-2 border-cyan-400' : 'hover:bg-gray-700/40'}`}
-                    onClick={() => onSelectUser(user)}
+                    className={`cursor-pointer flex justify-between items-center px-2 py-4  duration-300 ${selectedConversation === user._id ? 'bg-gray-600/60 border-r-2 border-cyan-400' : 'hover:bg-gray-700/40'}`}
+                    onClick={
+                        () => setSelectedConversation(user)}
                 >
                     <div className="flex gap-1 items-center">
                         <div className='avatar me-1'>
                             <Link to={`/profile/${user.username}`} className='w-8 rounded-full overflow-hidden'>
                                 <img src={user.profileImg || "/avatar-placeholder.png"} />
                             </Link>
+                            {onlineUsers.includes(user._id) && (
+                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-gray-800"></span>
+                            )}
                         </div>
                         <h2 className="text-gray-200 font-semibold">{user.fullName}</h2>
                         <p className="text-md font-light text-gray-500">@{user.username}</p>

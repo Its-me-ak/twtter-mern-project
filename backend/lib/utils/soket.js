@@ -5,12 +5,11 @@ import express from "express";
 const app = express();
 const server = http.createServer(app);
 
-// Track connected clients
-const userSocketMap = {};
+
 
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:6969"], 
+        origin: ["http://localhost:6969"],
         methods: ["GET", "POST"],
     },
 });
@@ -20,40 +19,28 @@ export function getReceiverSocketId(clientId) {
     return userSocketMap[clientId];
 }
 
+// Track connected clients
+const userSocketMap = {};
+
 // Handle socket connections
 io.on("connection", (socket) => {
+    // Use client-provided ID if available, else default to socket.id
     const clientId = socket.handshake.query?.clientId || socket.id;
 
     // Store the mapping of clientId to socket.id
     userSocketMap[clientId] = socket.id;
-    console.log(`A user connected: ${socket.id}, Client ID: ${clientId}`);
 
-    // Handle receiving messages
-    socket.on("send_message", (messageData) => {
-        const { recipientId, message } = messageData;
-        const receiverSocketId = getReceiverSocketId(recipientId); // Normalize IDs
+    console.log(`User connected: ${clientId}, Socket ID: ${socket.id}`);
 
-        console.log("Recipient ID:", recipientId);
-        console.log("Receiver Socket ID:", receiverSocketId);
-        console.log("Current userSocketMap:", userSocketMap);
-        if (receiverSocketId) {
-            // Send the message to the recipient
-            io.to(receiverSocketId).emit("receive_message", {
-                message,
-                senderId: clientId,
-            });
-            console.log(`Message sent to ${recipientId}: ${message}`);
-        } else {
-            console.log("Recipient is offline or not found.");
-        }
-    });
+    // Emit online users to all clients
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-    // Handle disconnection
     socket.on("disconnect", () => {
-        console.log(`User disconnected: ${socket.id}`);
-        // Remove the client from the userSocketMap
-        delete userSocketMap[clientId];
+        console.log(`User disconnected: ${clientId}, Socket ID: ${socket.id}`);
+        delete userSocketMap[clientId]; // Remove client from map
+        io.emit("getOnlineUsers", Object.keys(userSocketMap));
     });
 });
+
 
 export { io, server, app };

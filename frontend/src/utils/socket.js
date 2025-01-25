@@ -13,11 +13,11 @@ export const connectSocket = (clientId) => {
     socket = io("http://localhost:5000", {
         query:  {clientId}
     })
-    socket.on("connect", async () => {
+    socket.on("connect",  () => {
         console.log("Socket connected:", socket.id);
     });
 
-    socket.on("disconnect", async () => {
+    socket.on("disconnect",  () => {
         console.log("Socket disconnected.", socket.id);
     });
     return socket;

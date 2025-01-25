@@ -45,7 +45,7 @@ export const sendMessage = async (req, res) => {
         const senderId = req.user._id
 
         if (!text && !image) {
-            return res.status(400).json({ error: 'You cannot send empty message' });
+            return res.status(400).json({ error: 'You cannot send khali message' });
         }
         if (image) {
             const uploadedImageUrl = await cloudinary.uploader.upload(image)
