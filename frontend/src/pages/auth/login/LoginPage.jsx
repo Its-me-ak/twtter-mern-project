@@ -91,7 +91,7 @@ const queryClient = useQueryClient()
               onClick={togglePasswordVisibility}
               className='flex items-center justify-center'
               >
-              {showPassword ? <AiFillEyeInvisible /> : <AiFillEye />}
+                {showPassword ? <AiFillEye /> : <AiFillEyeInvisible />}
             </button>
           </label>
               </div>

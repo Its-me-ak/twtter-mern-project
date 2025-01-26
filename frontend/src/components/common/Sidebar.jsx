@@ -88,7 +88,7 @@ const Sidebar = () => {
                     <div
                         className='mt-auto mb-10 flex gap-2 items-start transition-all duration-300 hover:bg-[#181818] py-2 px-4 rounded-full cursor-pointer dropdown dropdown-top dropdown-end'
                     >
-                        <ul tabIndex={0} className="dropdown-content menu bg-black rounded-box z-[1] w-52 shadow shadow-white">
+                        <ul tabIndex={0} className="dropdown-content menu bg-black rounded-box md:z-[1] w-52 shadow shadow-white absolute left-2 z-50 md:static md:left-0">
                             <li>
                                 <a className="font-bold text-md" 
                                     onClick={(e) => {
@@ -105,7 +105,7 @@ const Sidebar = () => {
                                 <img src={authUser.user?.profileImg || "/avatar-placeholder.png"} />
                             </div>
                         </div>
-                        <div className='flex justify-between items-center flex-1' tabIndex={0} role="button" >
+                        <div className='flex md:justify-between justify-center items-center flex-1' tabIndex={0} role="button" >
                             <div className='hidden md:block'>
                                 <p className='text-white font-bold text-sm w-20 truncate'>{authUser.user?.fullName}</p>
                                 <p className='text-slate-500 text-sm'>@{authUser.user?.username}</p>

@@ -10,7 +10,7 @@ import useGetMessage from "../../hooks/useGetMessages";
 import useConversation from "../../zustand/useConversation";
 import useGetSocketMessage from "../../hooks/useGetSocketMessages";
 
-const ChatContainer = ({ authUser, }) => {
+const ChatContainer = ({ authUser, onSelectUser }) => {
     const { selectedConversation } = useConversation()
     const chatEndPointRef = useRef(null)
     const {messages, loading} = useGetMessage()
@@ -52,7 +52,7 @@ const ChatContainer = ({ authUser, }) => {
     if (loading) {
         return (
             <div className="flex-1 flex flex-col overflow-auto custom-scrollbar">
-                <ChatHeader selectedConversation={selectedConversation} />
+                <ChatHeader selectedConversation={selectedConversation}  />
                 <MessageSkeleton />
                 <ChatMessageInput />
 
@@ -62,7 +62,7 @@ const ChatContainer = ({ authUser, }) => {
 
     return (
         <div className="h-screen overflow-auto custom-scrollbar">
-            <ChatHeader selectedConversation={selectedConversation} />
+            <ChatHeader selectedConversation={selectedConversation} onSelectUser={onSelectUser} />
             <div className="mb-20">
                 {messages?.length > 0 ? (
                     messages.map((message) => (
