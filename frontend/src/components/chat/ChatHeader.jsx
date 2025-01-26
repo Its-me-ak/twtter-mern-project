@@ -3,7 +3,7 @@ import { FaArrowLeft } from "react-icons/fa6";
 
 const ChatHeader = ({ selectedConversation, onSelectUser }) => {
   return (
-      <div className="sticky top-0 left-0 z-10 bg-black bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 py-3 px-1 flex items-center gap-2">
+      <div className="sticky top-0 left-0 z-10 bg-black bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 py-3 px-1 md:px-3 flex items-center gap-2">
           <button
               className="md:hidden p-2 flex items-center gap-2 text-gray-500 hover:text-white"
               onClick={onSelectUser}

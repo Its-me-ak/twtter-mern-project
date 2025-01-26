@@ -10,7 +10,6 @@ const BookmarkPage = ({ userId }) => {
             try {
                 const response = await fetch(`/api/posts/bookmarks/${userId}`);
                 const data = await response.json();
-                // console.log('All bookmarks ', data);
                 if (!response.ok) throw new Error(data.error || "Failed to fetch bookmarked posts");
                 return data;
             } catch (error) {
@@ -31,7 +30,6 @@ const BookmarkPage = ({ userId }) => {
                 {bookmarksData?.length === 0 && <div className='text-center p-4 font-bold'>No notifications 🤔</div>}
                 {
                     bookmarksData.map((bookmark) => {
-                        // console.log('Rendering post: ', bookmark);
                         return <Post key={bookmark._id} post={bookmark} />
                     })
                 }

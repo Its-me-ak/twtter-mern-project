@@ -15,16 +15,13 @@ import { useSocketContext } from "../../context/SoketContext";
 const ChatSidebar = ({ onSelectUser }) => {
     const { chatUsers, loading } = useGetChatUsers()
     const { selectedConversation, setSelectedConversation } = useConversation()
-
+    console.log(selectedConversation);
+    
 
     const { onlineUsers } = useSocketContext()
     console.log(onlineUsers);
 
     if (loading) return <ProfileSkeleton />;
-    // if (isUserError) {
-    //     toast.error("Failed to fetch chat users");
-    //     return null;
-    // }
 
     return (
         <div >
@@ -32,7 +29,7 @@ const ChatSidebar = ({ onSelectUser }) => {
             {chatUsers.map((user) => (
                 <div
                     key={user._id}
-                    className={`cursor-pointer flex justify-between items-center px-2 py-4  duration-300 ${selectedConversation === user._id ? 'bg-gray-600/60 border-r-2 border-cyan-400' : 'hover:bg-gray-700/40'}`}
+                    className={`cursor-pointer flex justify-between items-center px-2 py-4  duration-300 ${selectedConversation?._id === user._id ? 'bg-gray-600/60 border-r-2 border-cyan-400' : 'hover:bg-gray-700/40'}`}
                     onClick={() => {
                         setSelectedConversation(user)
                         if (onSelectUser) onSelectUser()

@@ -1,11 +1,8 @@
-// import { useQuery } from "@tanstack/react-query";
-// import toast from "react-hot-toast";
 import ChatHeader from "./ChatHeader";
 import ChatMessageInput from "./ChatMessageInput";
 import { useEffect, useRef } from "react";
-import { MessageCircle } from "lucide-react";
+import { FiMessageCircle } from "react-icons/fi";
 import MessageSkeleton from "../skeletons/MessageSkeleton";
-// import { connectSocket } from "../../utils/socket";
 import useGetMessage from "../../hooks/useGetMessages";
 import useConversation from "../../zustand/useConversation";
 import useGetSocketMessage from "../../hooks/useGetSocketMessages";
@@ -13,9 +10,9 @@ import useGetSocketMessage from "../../hooks/useGetSocketMessages";
 const ChatContainer = ({ authUser, onSelectUser }) => {
     const { selectedConversation } = useConversation()
     const chatEndPointRef = useRef(null)
-    const {messages, loading} = useGetMessage()
+    const { messages, loading } = useGetMessage()
     useGetSocketMessage()
-    
+
     useEffect(() => {
         if (chatEndPointRef.current && messages) {
             chatEndPointRef.current.scrollIntoView({
@@ -52,7 +49,7 @@ const ChatContainer = ({ authUser, onSelectUser }) => {
     if (loading) {
         return (
             <div className="flex-1 flex flex-col overflow-auto custom-scrollbar">
-                <ChatHeader selectedConversation={selectedConversation}  />
+                <ChatHeader selectedConversation={selectedConversation} />
                 <MessageSkeleton />
                 <ChatMessageInput />
 
@@ -91,7 +88,7 @@ const ChatContainer = ({ authUser, onSelectUser }) => {
                     ))
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-center text-gray-600">
-                        <MessageCircle className="w-12 h-12 text-gray-400 mb-4" />
+                        <FiMessageCircle className="w-12 h-12 text-gray-400 mb-4" />
                         <h2 className="text-lg font-bold">No messages yet</h2>
                         <p className="text-sm">
                             Send a message to start the conversation.
@@ -99,7 +96,7 @@ const ChatContainer = ({ authUser, onSelectUser }) => {
                     </div>
                 )}
             </div>
-            <ChatMessageInput selectedConversation={selectedConversation}/>
+            <ChatMessageInput selectedConversation={selectedConversation} />
             <div ref={chatEndPointRef} />
         </div>
     );

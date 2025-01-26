@@ -44,7 +44,6 @@ const queryClient = useQueryClient()
   const handleSubmit = (e) => {
     e.preventDefault();
     loginMutate(formData);
-    // console.log(formData);
   };
 
   const handleInputChange = (e) => {

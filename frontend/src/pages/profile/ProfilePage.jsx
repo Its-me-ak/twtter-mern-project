@@ -24,7 +24,6 @@ const ProfilePage = () => {
                 const response = await fetch(`/api/users/profile/${username}`);
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || "Failed to fetch user data");
-                // console.log('User', data);
                 return data;
             } catch (error) {
                 throw new Error(error)

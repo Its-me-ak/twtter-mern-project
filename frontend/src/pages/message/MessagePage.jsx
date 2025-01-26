@@ -31,9 +31,9 @@ const MessagePage = () => {
           } md:block`}
       >
         {selectedConversation ? (
-          <>
-            <ChatContainer authUser={authUser.user._id} onSelectUser={toggleView} />
-          </>
+
+          <ChatContainer authUser={authUser.user._id} onSelectUser={toggleView} />
+
         ) : (
           <WelcomeMessage />
         )}

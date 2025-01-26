@@ -13,8 +13,6 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import BookmarkPage from './pages/bookmark/BookmarkPage';
 import MessagePage from './pages/message/MessagePage';
 import FollowingAndFollowersPage from './pages/profile/followingAndFollowers/FollowingAndFollowersPage';
-// import { connectSocket, disconnectSocket } from './utils/socket';
-// import { useEffect } from 'react';
 
 function App() {
   const location = useLocation()
@@ -34,13 +32,6 @@ function App() {
     },
     retry: false,
   });
-
-  // useEffect(()=> {
-  //   if(authUser){
-  //     connectSocket(authUser.user._id)
-  //   }
-  //   return () => disconnectSocket();
-  // }, [authUser])
 
   if (isLoading) {
     return (

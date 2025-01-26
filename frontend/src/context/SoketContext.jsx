@@ -1,10 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import io from "socket.io-client";
-// import { useAuthContext } from "./AuthContext";
 import { useQuery } from "@tanstack/react-query";
 const socketContext = createContext();
 
-// it is a hook.
 export const useSocketContext = () => {
     return useContext(socketContext);
 };
