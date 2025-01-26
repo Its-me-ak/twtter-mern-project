@@ -13,6 +13,7 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import BookmarkPage from './pages/bookmark/BookmarkPage';
 import MessagePage from './pages/message/MessagePage';
 import FollowingAndFollowersPage from './pages/profile/followingAndFollowers/FollowingAndFollowersPage';
+import SearchPage from './pages/search/SearchPage';
 
 function App() {
   const location = useLocation()
@@ -52,6 +53,7 @@ function App() {
         <Route path="/profile/:username" element={authUser ? <ProfilePage /> : <Navigate to={'/login'} />} />
         <Route path="/bookmarkes" element={authUser ? <BookmarkPage userId={authUser.user._id} /> : <Navigate to={'/login'} />} />
         <Route path="/messages" element={authUser ? <MessagePage /> : <Navigate to={'/login'} />} />
+        <Route path="/search" element={authUser ? <SearchPage /> : <Navigate to={'/login'} />} />
         <Route path="/following/:username" element={authUser ? <FollowingAndFollowersPage /> : <Navigate to={'/login'} />} />
       </Routes>
       {authUser && location.pathname !== '/messages' && <RightPanel />}

@@ -125,11 +125,11 @@ export const updateUserProfile = async (req, res) => {
             // const salt = await bcrypt.genSalt(10)
             user.password = await bcrypt.hash(newPassword, 10)
             // console.log(salt);
-            
+
         }
         if (profileImg) {
             // delete existing profile image if have any
-            if(user.profileImg){
+            if (user.profileImg) {
                 await cloudinary.uploader.destroy(user.profileImg.split('/').pop().split('.')[0])
             }
             const uploadUserProfileImage = await cloudinary.uploader.upload(profileImg)
@@ -138,13 +138,13 @@ export const updateUserProfile = async (req, res) => {
         }
         if (coverImg) {
             // delete existing cover image if have any
-            if(user.coverImg){
+            if (user.coverImg) {
                 await cloudinary.uploader.destroy(user.coverImg.split('/').pop().split('.')[0])
             }
             const uploadUserCoverImage = await cloudinary.uploader.upload(coverImg)
             coverImg = uploadUserCoverImage.secure_url
         }
-    
+
         user.fullName = fullName || user.fullName;
         user.email = email || user.email;
         user.username = username || user.username
@@ -167,9 +167,9 @@ export const updateUserProfile = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
- 
+
 export const getUserFollowings = async (req, res) => {
-    const {username} = req.params
+    const { username } = req.params
     try {
         const user = await UserModel.findOne({ username }).select("following");
         if (!user) {
@@ -181,19 +181,46 @@ export const getUserFollowings = async (req, res) => {
         console.error("Error in getUserFollowings", error);
         res.status(500).json({ error: error.message });
     }
-} 
+}
 
-    export const getUserFollowers = async (req, res) => {
-        const { username } = req.params
-        try {
-            const user = await UserModel.findOne({ username }).select("followers");
-            if (!user) {
-                return res.status(404).json({ error: "User not found" });
-            }
-            const followers = await UserModel.find({ _id: { $in: user.followers } }).select("-password")
-            res.status(200).json(followers);
-        } catch (error) {
-            console.error("Error in getUserFollowers", error);
-            res.status(500).json({ error: error.message });
+export const getUserFollowers = async (req, res) => {
+    const { username } = req.params
+    try {
+        const user = await UserModel.findOne({ username }).select("followers");
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
         }
+        const followers = await UserModel.find({ _id: { $in: user.followers } }).select("-password")
+        res.status(200).json(followers);
+    } catch (error) {
+        console.error("Error in getUserFollowers", error);
+        res.status(500).json({ error: error.message });
     }
+}
+
+// Search users
+export const searchUsers = async (req, res) => {
+    const { query } = req.query;
+
+    if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+    }
+
+    try {
+        const users = await UserModel.find({
+            $or: [
+                { username: { $regex: query, $options: "i" } },
+                { fullName: { $regex: query, $options: "i" } }
+            ]
+        }).select("-password"); // Exclude password from the response
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: "No users found" });
+        }
+
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Error in searchUsers:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
