@@ -10,34 +10,35 @@ export const useSocketContext = () => {
 export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState([]);
-    
-const {data: authUser} = useQuery({
-    queryKey: ["authUser"],
-})
+
+    const { data: authUser, isLoading } = useQuery({
+        queryKey: ["authUser"],
+    })
 
     useEffect(() => {
+        if (isLoading) return
         if (authUser?.user?._id) {
-            console.log("logging");
-            
-            const newSocket = io("https://twtter-mern-project.onrender.com", {
-                reconnectionAttempts:5,
-                reconnectionDelay: 2000,
-                query: { clientId: authUser?.user?._id },
-            });
-            setSocket(newSocket);
+            const timeOut = setTimeout(() => {
+                const newSocket = io("https://twtter-mern-project.onrender.com", {
+                    reconnectionAttempts: 5,
+                    reconnectionDelay: 2000,
+                    query: { clientId: authUser.user._id },
+                });
 
-            // Listen for online users
-            newSocket.on("getOnlineUsers", (users) => {
-                setOnlineUsers(users);
-            });
+                setSocket(newSocket);
 
-            // Clean up on unmount or logout
-            return () => {
-                newSocket.disconnect();
-                setSocket(null);
-            };
+                newSocket.on("getOnlineUsers", (users) => {
+                    setOnlineUsers(users);
+                });
+
+                return () => {
+                    newSocket.disconnect();
+                    setSocket(null);
+                };
+            }, 2000);
+            return () => clearTimeout(timeOut);
         }
-    }, [authUser]);
+    }, [authUser, isLoading]);
 
     return (
         <socketContext.Provider value={{ socket, onlineUsers }}>
