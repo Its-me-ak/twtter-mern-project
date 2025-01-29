@@ -44,7 +44,7 @@ export const SocketProvider = ({ children }) => {
             newSocket.disconnect();
             setSocket(null);
         };
-    }, [isAuthReady, isLoading, authUser.user._id]);
+    }, [isAuthReady, isLoading, authUser?.user._id]);
 
 
     return (
