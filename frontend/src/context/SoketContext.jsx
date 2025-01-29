@@ -16,7 +16,7 @@ const {data: authUser} = useQuery({
 })
 
     useEffect(() => {
-        if (authUser) {
+        if (authUser?.user?._id) {
             console.log("logging");
             
             const newSocket = io("https://twtter-mern-project.onrender.com", {
