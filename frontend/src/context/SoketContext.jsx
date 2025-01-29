@@ -20,6 +20,8 @@ const {data: authUser} = useQuery({
             console.log("logging");
             
             const newSocket = io("https://twtter-mern-project.onrender.com", {
+                reconnectionAttempts:5,
+                reconnectionDelay: 2000,
                 query: { clientId: authUser?.user?._id },
             });
             setSocket(newSocket);
