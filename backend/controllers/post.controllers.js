@@ -1,4 +1,3 @@
-import e, { request } from "express";
 import PostModel from "../models/post.model.js";
 import UserModel from "../models/user.model.js";
 import { v2 as cloudinary } from "cloudinary";
@@ -236,6 +235,10 @@ export const getBookmarkedPosts = async (req, res) => {
         const bookmarkedPosts = await PostModel.find({ _id: { $in: user.bookmarkedPosts } })
             .populate({
                 path: 'user',
+                select: '-password'
+            })
+            .populate({
+                path: 'comments.user',
                 select: '-password'
             })
         if (bookmarkedPosts.length === 0) {
