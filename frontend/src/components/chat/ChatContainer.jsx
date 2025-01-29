@@ -63,7 +63,7 @@ const ChatContainer = ({ authUser, onSelectUser }) => {
             <div className="mb-20">
                 {messages?.length > 0 ? (
                     messages.map((message) => (
-                        <div key={message._id} className={`chat mb-2 px-5 ${authUser === message.senderId ? 'chat-end' : 'chat-start'}`}>
+                        <div key={message._id} className={`chat mb-2 px-2 ${authUser === message.senderId ? 'chat-end' : 'chat-start'}`}>
                             <div
                                 className={`chat-bubble rounded-md flex flex-col ${message.image
                                     ? 'bg-transparent p-0'

@@ -1,7 +1,7 @@
-import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast"
 import Post from "../../components/common/Post";
+import PostSkeleton from "../../components/skeletons/PostSkeleton";
 
 const BookmarkPage = ({ userId }) => {
     const { data: bookmarksData, isLoading, error } = useQuery({
@@ -17,7 +17,7 @@ const BookmarkPage = ({ userId }) => {
             }
         }
     })
-    if (isLoading) return <LoadingSpinner />
+    if (isLoading) return <PostSkeleton />
     if (error) {
         toast.error(error.message)
     }
@@ -27,7 +27,7 @@ const BookmarkPage = ({ userId }) => {
                 <div className='flex justify-between items-center p-4 border-b border-gray-700'>
                     <p className='font-bold'>All Bookmarkes</p>
                 </div>
-                {bookmarksData?.length === 0 && <div className='text-center p-4 font-bold'>No notifications 🤔</div>}
+                {bookmarksData?.length === 0 && <div className='text-center p-4 font-bold'>No Bookmarked Post 🤔</div>}
                 {
                     bookmarksData.map((bookmark) => {
                         return <Post key={bookmark._id} post={bookmark} />

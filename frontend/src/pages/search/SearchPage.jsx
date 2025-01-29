@@ -40,8 +40,8 @@ const SearchPage = () => {
         <div className="flex-[4_4_0] border-l border-r border-gray-700 min-h-screen">
             {/* Header */}
             <div className='flex justify-between items-center p-4 border-b border-gray-700'>
-                <p className='font-bold'>Search Users</p>
-                <label className="input input-bordered flex items-center gap-2">
+                <p className='font-bold hidden md:block'>Search Users</p>
+                <label className="input input-bordered flex items-center gap-2 w-full md:w-auto">
                     <input
                         type="text"
                         className="grow"
@@ -67,7 +67,7 @@ const SearchPage = () => {
             ) : (
                 <>
                     {searchData?.map((user) => (
-                        <div key={user._id} className=" flex w-full gap-2 mb-4 p-3 hover:bg-[#111]/[0.45]">
+                        <div key={user._id} className=" flex space-x-2 mb-4 p-3 hover:bg-[#111]/[0.45]">
                             <Link to={`/profile/${user.username}`}>
                                 <img
                                     src={user.profileImg || "/avatar-placeholder.png"}
@@ -77,7 +77,7 @@ const SearchPage = () => {
                                 />
                             </Link>
                             <div className="flex flex-col">
-                                <div className="flex justify-between items-center w-[570px]">
+                                <div className="flex justify-between items-center w-full md:w-[570px]">
                                     <span>
                                         <p className="text-white font-medium">{user.fullName}</p>
                                         <p className="text-gray-500">@{user.username}</p>
