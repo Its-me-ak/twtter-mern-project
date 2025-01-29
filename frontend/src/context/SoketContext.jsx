@@ -16,29 +16,33 @@ export const SocketProvider = ({ children }) => {
     })
 
     useEffect(() => {
-        if (isLoading) return
-        if (authUser?.user?._id) {
-            const timeOut = setTimeout(() => {
-                const newSocket = io("https://twtter-mern-project.onrender.com", {
-                    reconnectionAttempts: 5,
-                    reconnectionDelay: 2000,
-                    query: { clientId: authUser.user._id },
-                });
+        if (isLoading) return; // Wait until data is loaded
 
-                setSocket(newSocket);
-
-                newSocket.on("getOnlineUsers", (users) => {
-                    setOnlineUsers(users);
-                });
-
-                return () => {
-                    newSocket.disconnect();
-                    setSocket(null);
-                };
-            }, 2000);
-            return () => clearTimeout(timeOut);
+        if (!authUser || !authUser?.user?._id) {
+            console.warn("authUser is not available yet:", authUser);
+            return;
         }
+
+        console.log("Setting up socket with clientId:", authUser.user._id);
+
+        const newSocket = io("https://twtter-mern-project.onrender.com", {
+            reconnectionAttempts: 5,
+            reconnectionDelay: 2000,
+            query: { clientId: authUser.user._id },
+        });
+
+        setSocket(newSocket);
+
+        newSocket.on("getOnlineUsers", (users) => {
+            setOnlineUsers(users);
+        });
+
+        return () => {
+            newSocket.disconnect();
+            setSocket(null);
+        };
     }, [authUser, isLoading]);
+
 
     return (
         <socketContext.Provider value={{ socket, onlineUsers }}>
