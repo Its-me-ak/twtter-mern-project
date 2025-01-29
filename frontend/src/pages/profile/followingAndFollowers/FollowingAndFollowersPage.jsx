@@ -8,10 +8,29 @@ import ProfileSkeleton from "../../../components/skeletons/ProfileSkeleton";
 
 const FollowingAndFollowersPage = () => {
     const { username } = useParams();
+    const [followedUsers, setFollowedUsers] = useState(new Set());
     const [activeTab, setActiveTab] = useState("followers");
     const [hoverdUser, setHoveredUser] = useState(null);
     const { followUser } = useFollow()
     const navigate = useNavigate()
+
+    const toggleFollow = (followerId) => {
+        setFollowedUsers((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(followerId)) {
+                newSet.delete(followerId);
+            } else {
+                newSet.add(followerId);
+            }
+            return newSet;
+        });
+
+        followUser(followerId);
+    };
+
+    const { data: user } = useQuery({
+        queryKey: ['user']
+    })
 
     const { data: followingUser, isLoading: followingLoading } = useQuery({
         queryKey: ["followingUser"],
@@ -34,10 +53,6 @@ const FollowingAndFollowersPage = () => {
         },
         enabled: activeTab === "followers",
     });
-
-    const { data: user } = useQuery({
-        queryKey: ['user']
-    })
 
 
     return (
@@ -81,10 +96,11 @@ const FollowingAndFollowersPage = () => {
                         ) : (
                             <ul>
                                 {followers?.map((follower) => {
-                                    const isUserFollowed = follower.followers?.includes(user._id);
+                                    const isUserFollowed = followedUsers.has(follower._id) || follower.followers?.includes(user._id);
+
                                     return (
-                                        <li key={user._id} className=" flex space-x-2 mb-4 p-3 hover:bg-[#111]/[0.45]">
-                                            <Link to={`/profile/${user.username}`}>
+                                        <li key={follower._id} className=" flex space-x-2 mb-4 p-3 hover:bg-[#111]/[0.45]">
+                                            <Link to={`/profile/${follower.username}`}>
                                                 <img
                                                     src={follower.profileImg || "/avatar-placeholder.png"}
                                                     alt={follower.username}
@@ -99,17 +115,17 @@ const FollowingAndFollowersPage = () => {
                                                         <p className="text-gray-500">@{follower.username} <span className="text-[12px] bg-gray-700 px-1 ms-2 rounded-sm text-gray-400">Follows you</span></p>
                                                     </span>
                                                     <button
-                                                        className={`btn btn-outline rounded-full btn-sm ${hoverdUser === user._id ? "btn-error" : ""
+                                                        className={`btn btn-outline rounded-full btn-sm ${hoverdUser === follower._id && isUserFollowed ? "btn-error" : ""
                                                             }`}
-                                                        onMouseEnter={() => setHoveredUser(user._id)}
+                                                        onMouseEnter={() => setHoveredUser(follower._id)}
                                                         onMouseLeave={() => setHoveredUser(null)}
-                                                        onClick={() => followUser(follower._id)}
+                                                        onClick={() => toggleFollow(follower._id)}
                                                     >
-                                                        {hoverdUser === user._id
-                                                            ? "Unfollow"
-                                                            : isUserFollowed
-                                                                ? "Following"
-                                                                : "Follow"}
+                                                        {isUserFollowed
+                                                            ? hoverdUser === follower._id
+                                                                ? "Unfollow"
+                                                                : "Following"
+                                                            : "Follow"}
                                                     </button>
                                                 </div>
                                                 <p className="text-gray-400 text-sm">
@@ -131,12 +147,12 @@ const FollowingAndFollowersPage = () => {
                             <ProfileSkeleton />
                         ) : (
                             <ul>
-                                {followingUser?.map((user) => (
-                                    <li key={user._id} className=" flex space-x-2 mb-4 p-3 hover:bg-[#111]/[0.45]">
-                                        <Link to={`/profile/${user.username}`}>
+                                {followingUser?.map((following) => (
+                                    <li key={following._id} className=" flex space-x-2 mb-4 p-3 hover:bg-[#111]/[0.45]">
+                                        <Link to={`/profile/${following.username}`}>
                                             <img
-                                                src={user.profileImg || "/avatar-placeholder.png"}
-                                                alt={user.username}
+                                                src={following.profileImg || "/avatar-placeholder.png"}
+                                                alt={following.username}
                                                 className="w-12 h-12 rounded-full object-cover"
 
                                             />
@@ -144,23 +160,23 @@ const FollowingAndFollowersPage = () => {
                                         <div className="flex flex-col">
                                             <div className="flex justify-between items-center w-[570px]">
                                                 <span>
-                                                    <p className="text-white font-medium">{user.fullName}</p>
-                                                    <p className="text-gray-500">@{user.username}</p>
+                                                    <p className="text-white font-medium">{following.fullName}</p>
+                                                    <p className="text-gray-500">@{following.username}</p>
                                                 </span>
                                                 <button
-                                                    className={`btn btn-outline rounded-full btn-sm ${hoverdUser === user._id ? "btn-error" : ""
+                                                    className={`btn btn-outline rounded-full btn-sm ${hoverdUser === following._id ? "btn-error" : ""
                                                         }`}
-                                                    onMouseEnter={() => setHoveredUser(user._id)}
+                                                    onMouseEnter={() => setHoveredUser(following._id)}
                                                     onMouseLeave={() => setHoveredUser(null)}
 
-                                                    onClick={() => followUser(user._id)}
+                                                    onClick={() => followUser(following._id)}
                                                 >
 
-                                                    {hoverdUser === user._id ? "Unfollow" : user.following ? "Following" : "Follow"}
+                                                    {hoverdUser === following._id ? "Unfollow" : following.following ? "Following" : "Follow"}
                                                 </button>
                                             </div>
                                             <p className="text-gray-400 text-sm">
-                                                {user.bio}
+                                                {following.bio}
                                             </p>
                                         </div>
                                     </li>
