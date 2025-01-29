@@ -15,7 +15,6 @@ const {data: authUser} = useQuery({
     queryKey: ["authUser"],
 })
 
-    
     useEffect(() => {
         if (authUser) {
             console.log("logging");

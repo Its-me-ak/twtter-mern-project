@@ -27,7 +27,6 @@ const queryClient = useQueryClient()
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Failed to create account");
-      console.log(data);
       return data;
     },
     onError: (err) => {

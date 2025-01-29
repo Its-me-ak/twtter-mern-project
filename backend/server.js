@@ -29,6 +29,7 @@ app.use(express.json(
 ));
 app.use(express.urlencoded({ extended : true }));
 app.use(cookieParser())
+app.use(cors())
 
 app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
@@ -49,6 +50,6 @@ server.listen(PORT, () => {
     dbConnect()
 });
 
-//   "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
+//  "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
 // "start": "cross-env NODE_ENV=production node backend/server.js"
 // "dev": "cross-env NODE_ENV=development nodemon backend/server.js",

@@ -20,7 +20,6 @@ const Posts = ({ feedType, username, userId }) => {
   }
 
   const POST_URI = getPostEndPont();
-  console.log(POST_URI);
 
   const { data: posts, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["posts"],

@@ -11,11 +11,8 @@ import { useSocketContext } from "../../context/SoketContext";
 const ChatSidebar = ({ onSelectUser }) => {
     const { chatUsers, loading } = useGetChatUsers()
     const { selectedConversation, setSelectedConversation } = useConversation()
-    console.log(selectedConversation);
-
 
     const { onlineUsers } = useSocketContext()
-    console.log(onlineUsers);
 
     if (loading) return <ProfileSkeleton />;
 
