@@ -16,10 +16,10 @@ export const SocketProvider = ({ children }) => {
         queryKey: ["authUser"],
     })
     const SOCKET_URL =
-        window.location.hostname === "localhost"
-            ? "http://localhost:5000"
-            : "https://twtter-mern-project.onrender.com";
-
+        import.meta.env.VITE_NODE_ENV === "production"
+        ? "https://twtter-mern-project.onrender.com"
+        : "http://localhost:5000";
+        
     useEffect(() => {
         if (authUser?.user?._id) {
             setIsAuthReady(true); 
