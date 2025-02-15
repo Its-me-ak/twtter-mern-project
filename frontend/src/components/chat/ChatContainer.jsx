@@ -14,13 +14,14 @@ const ChatContainer = ({ authUser, onSelectUser }) => {
     useGetSocketMessage()
 
     useEffect(() => {
-        if (chatEndPointRef.current && messages) {
-            chatEndPointRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'end',
-            });
-        }
-    }, [messages]);
+        const timer = setTimeout(() => {
+            if (chatEndPointRef.current && messages) {
+                chatEndPointRef.current.scrollIntoView({ behavior: "smooth" });
+            }
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, [messages, selectedConversation]);
 
     const formatMessageTime = (dateString) => {
         const now = new Date();
@@ -95,9 +96,9 @@ const ChatContainer = ({ authUser, onSelectUser }) => {
                         </p>
                     </div>
                 )}
+                <div ref={chatEndPointRef} />
             </div>
             <ChatMessageInput selectedConversation={selectedConversation} />
-            <div ref={chatEndPointRef} />
         </div>
     );
 };
