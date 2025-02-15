@@ -28,9 +28,11 @@ export const SocketProvider = ({ children }) => {
         console.log("Setting up socket with clientId:", authUser.user._id);
 
         const newSocket = io("https://twtter-mern-project.onrender.com", {
+            transports: ["websocket"],
             reconnectionAttempts: 5,
             reconnectionDelay: 2000,
             query: { clientId: authUser.user._id },
+            withCredentials: true
         });
 
         setSocket(newSocket);
