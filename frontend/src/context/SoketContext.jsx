@@ -3,6 +3,7 @@ import io from "socket.io-client";
 import { useQuery } from "@tanstack/react-query";
 const socketContext = createContext();
 
+const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:6969" : "/";
 export const useSocketContext = () => {
     return useContext(socketContext);
 };
@@ -15,10 +16,6 @@ export const SocketProvider = ({ children }) => {
     const { data: authUser, isLoading } = useQuery({
         queryKey: ["authUser"],
     })
-    const SOCKET_URL =
-        import.meta.env.VITE_NODE_ENV === "production"
-        ? "https://twtter-mern-project.onrender.com"
-        : "http://localhost:5000";
         
     useEffect(() => {
         if (authUser?.user?._id) {
@@ -31,7 +28,7 @@ export const SocketProvider = ({ children }) => {
 
         console.log("Setting up socket with clientId:", authUser.user._id);
 
-        const newSocket = io(SOCKET_URL, {
+        const newSocket = io(BASE_URL, {
             transports: ["websocket"],
             reconnectionAttempts: 5,
             reconnectionDelay: 2000,

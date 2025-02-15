@@ -30,7 +30,7 @@ app.use(express.json(
 app.use(express.urlencoded({ extended : true }));
 app.use(cookieParser())
 app.use(cors({
-    origin: ["http://localhost:6969", "https://twtter-mern-project.onrender.com"],
+    origin: ["http://localhost:6969"],
     credentials: true
 }));
 
@@ -40,11 +40,11 @@ app.use("/api/posts", postRoutes)
 app.use("/api/notifications", notificationRoutes)
 app.use("/api/messages", messageRoutes)
 
-if(process.env.NODE_ENV === 'production'){
-    app.use(express.static(path.join(__dirname, 'frontend/dist')))
+if (process.env.VITE_NODE_ENV === 'production'){
+    app.use(express.static(path.join(__dirname, '../frontend/dist')))
 
     app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'))
+        res.sendFile(path.resolve(__dirname, '../frontend', 'dist', 'index.html'))
     })
 }
 
