@@ -1,16 +1,36 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { BsImage, BsEmojiSmile } from "react-icons/bs";
 import { MdSend, MdCancel } from "react-icons/md";
 import useSendMessage from "../../hooks/useSendMessage";
 import LoadingSpinner from "../common/LoadingSpinner";
+import EmojiPicker from 'emoji-picker-react';
 
 const ChatMessageInput = () => {
     const [message, setMessage] = useState("")
     const [imagePreview, setImagePreview] = useState(null)
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false)
     const fileInputRef = useRef(null)
+    const emojiPickerRef = useRef();
+
     const { sendMessage, loading } = useSendMessage()
-    
+
+    useEffect(() => {
+        const handler = (event) => {
+            if (!emojiPickerRef.current) {
+                return;
+            }
+            if (!emojiPickerRef.current.contains(event.target)) {
+                setShowEmojiPicker(false)
+            }
+        }
+        document.addEventListener("click", handler, true)
+
+        return () => {
+            document.removeEventListener("click", handler)
+        }
+    }, [])
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (!file.type.startsWith("image/")) {
@@ -27,12 +47,12 @@ const ChatMessageInput = () => {
 
     const removeImagePreview = () => {
         setImagePreview(null);
-        if(fileInputRef.current) fileInputRef.current.value = ""
+        if (fileInputRef.current) fileInputRef.current.value = ""
     }
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if(!message.trim() && !imagePreview ) return
+        if (!message.trim() && !imagePreview) return
         try {
             await sendMessage({
                 text: message.trim(),
@@ -44,6 +64,11 @@ const ChatMessageInput = () => {
             toast.error(error.message || "Failed to send a message");
         }
     }
+
+    const handleEmojiClick = (emojiObject) => {
+        setMessage((prevMessage) => prevMessage + emojiObject.emoji)
+    }
+
     return (
         <div className="p-2 w-full absolute bottom-0 left-0 border-t border-gray-700 bg-base-300">
             {imagePreview && (
@@ -69,11 +94,13 @@ const ChatMessageInput = () => {
                 {/* Left icons */}
                 <div className="flex gap-3 text-blue-500">
                     <button type="button" className="hover:text-blue-400"
-                    onClick={() => fileInputRef.current?.click()}
+                        onClick={() => fileInputRef.current?.click()}
                     >
                         <BsImage size={20} />
                     </button>
-                    <button type="button" className="hover:text-blue-400">
+                    <button type="button" className="hover:text-blue-400"
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    >
                         <BsEmojiSmile size={20} />
                     </button>
                 </div>
@@ -94,6 +121,14 @@ const ChatMessageInput = () => {
                         className="w-full input input-bordered rounded-full input-sm sm:input-md bg-base-200 placeholder-gray-400 text-white"
                         placeholder="Start a new message..."
                     />
+                    {showEmojiPicker && (
+                        <div className="absolute bottom-16 left-0 z-10" ref={emojiPickerRef}>
+                            <EmojiPicker
+                                onEmojiClick={handleEmojiClick}
+                                previewConfig={{ showPreview: false }}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Send button */}
@@ -102,8 +137,8 @@ const ChatMessageInput = () => {
                     disabled={!message.trim() && !imagePreview}
                     className="btn btn-circle btn-sm sm:btn-md border-none text-white bg-primary hover:bg-cyan-600"
                 >
-                    { loading ? <LoadingSpinner size="sm"/> : <MdSend />}
-                  
+                    {loading ? <LoadingSpinner size="sm" /> : <MdSend />}
+
                 </button>
             </form>
         </div>
