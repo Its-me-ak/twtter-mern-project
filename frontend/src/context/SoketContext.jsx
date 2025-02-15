@@ -15,23 +15,27 @@ export const SocketProvider = ({ children }) => {
     const { data: authUser, isLoading } = useQuery({
         queryKey: ["authUser"],
     })
+    const SOCKET_URL =
+        window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://twtter-mern-project.onrender.com";
 
     useEffect(() => {
         if (authUser?.user?._id) {
-            setIsAuthReady(true); // Mark auth as ready when user ID exists
+            setIsAuthReady(true); 
         }
     }, [authUser]);
 
     useEffect(() => {
-        if (!isAuthReady || isLoading) return; // Wait until authUser is ready
+        if (!isAuthReady || isLoading || !authUser?.user?._id) return;
 
         console.log("Setting up socket with clientId:", authUser.user._id);
 
-        const newSocket = io("https://twtter-mern-project.onrender.com", {
+        const newSocket = io(SOCKET_URL, {
             transports: ["websocket"],
             reconnectionAttempts: 5,
             reconnectionDelay: 2000,
-            query: { clientId: authUser.user._id },
+            query: { clientId: authUser?.user?._id },
             withCredentials: true
         });
 
@@ -46,7 +50,7 @@ export const SocketProvider = ({ children }) => {
             newSocket.disconnect();
             setSocket(null);
         };
-    }, [isAuthReady, isLoading, authUser?.user._id]);
+    }, [isAuthReady, isLoading, authUser?.user?._id,]);
 
 
     return (
