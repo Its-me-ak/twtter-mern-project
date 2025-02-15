@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-
 import XSvg from "../../../components/svg/X";
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import { MdOutlineMail } from "react-icons/md";
