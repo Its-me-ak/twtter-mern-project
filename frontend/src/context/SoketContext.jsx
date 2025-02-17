@@ -1,9 +1,8 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import { useQuery } from "@tanstack/react-query";
 const socketContext = createContext();
 
-const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:6969" : "/";
 export const useSocketContext = () => {
     return useContext(socketContext);
 };
@@ -12,28 +11,30 @@ export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState([]);
     const [isAuthReady, setIsAuthReady] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+    const [message, setMessage] = useState("")
+    const emojiPickerRef = useRef();
+
 
     const { data: authUser, isLoading } = useQuery({
         queryKey: ["authUser"],
     })
-        
+
     useEffect(() => {
         if (authUser?.user?._id) {
-            setIsAuthReady(true); 
+            setIsAuthReady(true); // Mark auth as ready when user ID exists
         }
     }, [authUser]);
 
     useEffect(() => {
-        if (!isAuthReady || isLoading || !authUser?.user?._id) return;
+        if (!isAuthReady || isLoading) return; // Wait until authUser is ready
 
         console.log("Setting up socket with clientId:", authUser.user._id);
 
-        const newSocket = io(BASE_URL, {
-            transports: ["websocket"],
+        const newSocket = io("http://localhost:5000", {
             reconnectionAttempts: 5,
             reconnectionDelay: 2000,
-            query: { clientId: authUser?.user?._id },
-            withCredentials: true
+            query: { clientId: authUser.user._id },
         });
 
         setSocket(newSocket);
@@ -47,11 +48,16 @@ export const SocketProvider = ({ children }) => {
             newSocket.disconnect();
             setSocket(null);
         };
-    }, [isAuthReady, isLoading, authUser?.user?._id,]);
+    }, [isAuthReady, isLoading, authUser?.user._id]);
 
+    const handleEmojiClick = (emojiObject) => {
+        setMessage((prevMessage) => prevMessage + emojiObject.emoji)
+    }
 
     return (
-        <socketContext.Provider value={{ socket, onlineUsers }}>
+        <socketContext.Provider value={{
+            socket, onlineUsers, message, setMessage, showEmojiPicker, setShowEmojiPicker, handleEmojiClick, emojiPickerRef
+        }}>
             {children}
         </socketContext.Provider>
     );

@@ -5,15 +5,13 @@ import { MdSend, MdCancel } from "react-icons/md";
 import useSendMessage from "../../hooks/useSendMessage";
 import LoadingSpinner from "../common/LoadingSpinner";
 import EmojiPicker from 'emoji-picker-react';
+import { useSocketContext } from "../../context/SoketContext";
 
 const ChatMessageInput = () => {
-    const [message, setMessage] = useState("")
     const [imagePreview, setImagePreview] = useState(null)
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false)
     const fileInputRef = useRef(null)
-    const emojiPickerRef = useRef();
-
     const { sendMessage, loading } = useSendMessage()
+    const { message, setMessage, showEmojiPicker, setShowEmojiPicker, handleEmojiClick, emojiPickerRef } = useSocketContext()
 
     useEffect(() => {
         const handler = (event) => {
@@ -65,9 +63,6 @@ const ChatMessageInput = () => {
         }
     }
 
-    const handleEmojiClick = (emojiObject) => {
-        setMessage((prevMessage) => prevMessage + emojiObject.emoji)
-    }
 
     return (
         <div className="p-2 w-full absolute bottom-0 left-0 border-t border-gray-700 bg-base-300">
