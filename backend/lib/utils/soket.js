@@ -9,8 +9,9 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:6969"],
+        origin: ["http://localhost:6969", "https://twtter-mern-project.onrender.com"],
         methods: ["GET", "POST"],
+        credentials: true 
     },
 });
 
